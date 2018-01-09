@@ -1,0 +1,140 @@
+{
+  "title": "Ch 035 Decode JSON",
+  "cells": [
+    {
+      "type": "text",
+      "data": "JSON (JavaScript Object Notation) defines the way objects are stored and structured in JS. E.g."
+    },
+    {
+      "type": "code",
+      "language": "javascript",
+      "data": "{\n\t\"name\": \"Daren Estrada\",\n\t\"favorite_movie\": {\n\t\t\"title\": \"Finding Dory\",\n\t\t\"release_year\": \"2016\",\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "JSON data is presented such that <code>{ }</code>​ encapsulate dictionary key:value pairs and&nbsp;<code>​[ ]</code>​ are arrays. In the above example, <code>name</code> is of type <code>String</code>​, and <code>favorite_movie</code>​ is of type <code>[[String:String]]</code>. In short, the object above is of type <code>[[String:Any]]</code>."
+    },
+    {
+      "type": "text",
+      "data": "<h2>Receive JSON</h2>"
+    },
+    {
+      "type": "text",
+      "data": "First, add this extension to URL, which lay the groundwork for generating query URLs"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "extension URL {\n\tfunc withQueries(_ queries: [String:String]) -> URL? {\n\t\tvar components = URLComponents(url: self, resolvingAgainstBaseURL: true)\n\t\tcomponents?.queryItems = queries.flatMap { URLQueryItem(name: $0.0, value: $0.1) }\n\t\t// This takes out each non-optional key:value pair in the array and init URLQueryItem with them\n\t\treturn components?.url\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "Generate the query link"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let nasaApodBaseUrl = URL(string: \"https://api.nasa.gov/planetary/apod\")\nlet query: [String:String] = [\n\t\"api_key\":\"DEMO_KEY\",\n\t\"hd\":\"True\"\n]\nlet nasaApodCustomUrl = nasaApodBaseUrl?.withQueries(query)\n\nlet nasaApodCustomTask = URLSession.shared.dataTask(with: nasaApodCustomUrl!) { (data, urlResponse, error) in\n\tif let data = data {\n\t\tdo {\n\t\t\tlet decoder = JSONDecoder()\n\t\t\tlet photoDictionary = try decoder.decode([String:String].self, from: data)\n\t\t\tprint(photoDictionary)\n\t\t} catch {\n\t\t\tprint(error.localizedDescription)\n\t\t}\n\t}\n}\nnasaApodCustomTask.resume()"
+    },
+    {
+      "type": "text",
+      "data": "JSON returned by NASA APOD API"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "data": "{\n  \"copyright\": \"Daniel L\\u00f3pezIAC\", \n  \"date\": \"2018-01-08\", \n  \"explanation\": \"What are those red clouds surrounding the Andromeda galaxy? This galaxy, M31, is often imaged by planet Earth-based astronomers. As the nearest large spiral galaxy, it is a familiar sight with dark dust lanes, bright yellowish core, and spiral arms traced by clouds of bright blue stars.  A mosaic of well-exposed broad and narrow-band image data, this colorful portrait of our neighboring island universe offers strikingly unfamiliar features though, faint reddish clouds of glowing ionized hydrogen gas in the same wide field of view. These ionized hydrogen clouds surely lie in the foreground of the scene, well within our Milky Way Galaxy. They are likely associated with the pervasive, dusty interstellar cirrus clouds scattered hundreds of light-years above our own galactic plane.   Free APOD Lecture Tomorrow: January 9 at the National Harbor near Washington, DC\", \n  \"hdurl\": \"https://apod.nasa.gov/apod/image/1801/M31Clouds_DLopez_1500.jpg\", \n  \"media_type\": \"image\", \n  \"service_version\": \"v1\", \n  \"title\": \"Clouds of Andromeda\", \n  \"url\": \"https://apod.nasa.gov/apod/image/1801/M31Clouds_DLopez_960.jpg\"\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Decoding JSON into Swift</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Use the Codable protocol to decode the JSON and init object"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct PhotoInfo: Codable {\n\tlet title: String\n\tlet description: String\n\tlet url: URL\n\tlet copyright: String?\n\t\n\tenum CodingKeys: String, CodingKey {\n\t\tcase title\n\t\tcase description = \"explanation\"\t\t\t\t\t\t\t\t\t\t// For non-matching identifier in JSON\n\t\tcase url = \"hdurl\"\n\t\tcase copyright\n\t}\n\t\n\tinit(from decoder: Decoder) throws {\t\t\t\t\t\t\t\t\t\t// throws means throwing func\n\t\tlet valueContainer = try decoder.container(keyedBy: CodingKeys.self)\n\t\tself.title = try valueContainer.decode(String.self, forKey: .title)\n\t\tself.description = try valueContainer.decode(String.self, forKey: .description)\n\t\tself.url = try valueContainer.decode(URL.self, forKey: .url)\n\t\tself.copyright = try valueContainer.decode(String.self, forKey: .copyright)\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "Then, in&nbsp;<code>​if let data = data</code>​"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let photoInfo = try decoder.decode(PhotoInfo.self, from: data)"
+    },
+    {
+      "type": "text",
+      "data": "The decoder will call&nbsp;<code>​init</code>​ and create the object"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Completion Handler &amp; Passing Out Object in Closure</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Say I put all the above code into a function&nbsp;<code>​fetchPhotoInfo() → PhotoInfo?</code>​ and return <code>​photoInfo</code>&nbsp;after decoding, it won't work."
+    },
+    {
+      "type": "text",
+      "data": "<span style=\"color: rgb(75, 209, 86); font-family: Menlo; font-size: 16px; background-color: rgb(0, 0, 0);\">\"Unexpected non-void return value in void function\"</span><br>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Because the data task is run async on the shared URLSession instance, the program will have executed other code long before photoInfo can be returned. Solution is to write a custom completion handler, so code will execute only after&nbsp;<span style=\"font-family: Menlo, Consolas, &quot;Ubuntu Mono&quot;, Monaco, source-code-pro, monospace; font-size: 16.200000762939453px; background-color: rgba(0, 0, 0, 0.0392157);\">photoInfo<code>​</code>​<code>​</code>​<code>​</code>​</span><font face=\"Menlo, Consolas, Ubuntu Mono, Monaco, source-code-pro, monospace\" size=\"3\">&nbsp;</font>is returned.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "import PlaygroundSupport\nPlaygroundPage.current.needsIndefiniteExecution = true\n// This line is added so playground sticks around and wait for the request to complete, even though it does not support asynchronous code\n\nfunc fetchPhotoInfo(completion: @escaping (PhotoInfo?) -> Void) {\n\tlet nasaApodBaseUrl = URL(string: \"https://api.nasa.gov/planetary/apod\")\n\tlet query: [String:String] = [\n\t\t\"api_key\":\"DEMO_KEY\",\n\t\t\"hd\":\"True\"\n\t]\n\tlet nasaApodCustomUrl = nasaApodBaseUrl?.withQueries(query)\n\tprint(\"Custom URL: \\(nasaApodCustomUrl!)\")\n\t\n\tlet nasaApodCustomTask = URLSession.shared.dataTask(with: nasaApodCustomUrl!) { (data, urlResponse, error) in\n\t\tif let data = data {\n\t\t\tdo {\n\t\t\t\tlet decoder = JSONDecoder()\n\t\t\t\tlet photoDictionary = try decoder.decode([String:String].self, from: data)\n\t\t\t\t// Use Type.self for Type as argument\n\t\t\t\tprint(photoDictionary)\n\t\t\t\tlet photoInfo = try decoder.decode(PhotoInfo.self, from: data)\n\t\t\t\tcompletion(photoInfo)\t\t\t\t\t\t\t\t\t\t\t\t// Pass object out\n\t\t\t} catch {\n\t\t\t\tprint(error.localizedDescription)\n\t\t\t\tcompletion(nil)\n\t\t\t}\n\t\t}\n\t}\n\tnasaApodCustomTask.resume()\n}\n\nfetchPhotoInfo { (fetchedPhotoInfo) in\n\tguard let fetchedPhotoInfo = fetchedPhotoInfo else { return }\n\tprint(fetchedPhotoInfo)\n\tPlaygroundPage.current.finishExecution()\t\t\t\t\t\t\t\t\t\t// so playground knows to end now\n}"
+    },
+    {
+      "type": "text",
+      "data": "OK so what's going on?<div>When <code>fetchPhotoInfo(completion:)</code> is called, the following happens:</div><div><ol><li><code>nasaApodCustomUrl</code> goes into memory<br></li><li><code>nasaApodCustomTask</code> started as a shared instance of <code>URLSession</code>, running async<br></li><li><code>photoInfo</code> initiated, passed into <code>completion(_:)</code><br></li><li><code>@escape</code> indicates that code in the body of the function call only execute after&nbsp;<code>completion(_:)</code> has an argument</li><li>Argument of&nbsp;<span style=\"color: rgb(0, 0, 0); font-family: Menlo, Consolas, &quot;Ubuntu Mono&quot;, Monaco, source-code-pro, monospace; font-size: 16.200000762939453px; background-color: rgb(232, 232, 232);\">completion(_:)</span>&nbsp;declared as&nbsp;<code>fetchedPhotoInfo</code>, and finally printed</li></ol><div>Basically, body of the function call is the completion handler</div></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Placement of Code</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Where to put the above code?&nbsp;<div>Simple project? Put in ViewController.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class PhotoVC: UIViewController {\n\toverride func viewDidLoad() {\n\t\tfetchPhotoInfo { (fetchedPhotoInfo) in\n\t\t\tself.updateUI(with: fetchedPhotoInfo)\n\t\t}\n\t}\n\t\n\tfunc updateUI(with photoInfo: PhotoInfo) {...}\n\tfunc fetchPhotoInfo(completion: @escaping (PhotoInfo?) -> Void) {...}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<div>Mid-size? Maybe as a static method of the model object.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// In extension file\nextension PhotoInfo {\n\tfunc fetchPhotoInfo(completion: @escaping (PhotoInfo?) -> Void) {...}\n}\n\n// In VC\nclass PhotoVC: UIViewController {\n\toverride func viewDidLoad() {\n\t\tPhotoInfo.fetchPhotoInfo { (fetchedPhotoInfo) in\n\t\t\tself.updateUI(with: fetchedPhotoInfo)\n\t\t}\n\t}\n\t\n\tfunc updateUI(with photoInfo: PhotoInfo) {...}\n}"
+    },
+    {
+      "type": "text",
+      "data": "Complex projects? Better in a model controller type."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// In Model Controller file\nstruct PhotoInfoController {\n\tfunc fetchPhotoInfo(completion: @escaping (PhotoInfo?) -> Void) {...}\n}\n\n// In VC\nclass PhotoVC: UIViewController {\n\toverride func viewDidLoad() {\n\t\tlet photoInfoController = PhotoInfoController()\n\t\tphotoInfoController.fetchPhotoInfo { (fetchedPhotoInfo) in\n\t\t\tself.updateUI(with: fetchedPhotoInfo)\n\t\t}\n\t}\n\t\n\tfunc updateUI(with photoInfo: PhotoInfo) {...}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Practice: iTunes Search API</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "import UIKit\nimport PlaygroundSupport\nPlaygroundPage.current.needsIndefiniteExecution = true\n\nextension URL {\n\tfunc withQueries(_ queries: [String:String]) -> URL? {\n\t\tvar components = URLComponents(url: self, resolvingAgainstBaseURL: true)\n\t\tcomponents?.queryItems = queries.flatMap { URLQueryItem(name: $0.0, value: $0.1) }\n\t\t// This takes out each non-optional key:value pair in the array and init URLQueryItem with them\n\t\treturn components?.url\n\t}\n}\n\n//:### Itunes Search\nstruct iTunesItem: Codable, CustomStringConvertible {\n\tlet title: String\n\tlet artworkURL: URL\n\tlet artist: String\n\tlet kind: String\n\tlet itemDescription: String\n\t// CustomStringConvertible required property, used for print(_:)\n\tvar description: String {\n\t\treturn \"title:\\(title)-kind:\\(kind)\"\n\t}\n\t\n\tenum CodingKeys: String, CodingKey {\n\t\tcase title = \"trackName\"\n\t\tcase artworkURL = \"artworkUrl60\"\n\t\tcase artist = \"artistName\"\n\t\tcase kind\n\t\tcase itemDescription = \"description\"\n\t}\n\t\n\t// AdditionalKeys needed because some items have description and some longDescription, the rest none\n\tenum AdditionalKeys: String, CodingKey {\n\t\tcase itemDescription = \"longDescription\"\n\t}\n\t\n\tinit(from decoder:Decoder) throws {\n\t\tlet valueContainer = try decoder.container(keyedBy: CodingKeys.self)\n\t\tself.title = try valueContainer.decode(String.self, forKey: .title)\n\t\tself.artworkURL = try valueContainer.decode(URL.self, forKey: .artworkURL)\n\t\tself.artist = try valueContainer.decode(String.self, forKey: .artist)\n\t\tself.kind = try valueContainer.decode(String.self, forKey: .kind)\n\t\t// Handling for AdditionalKeys, use try? in case fail will return nil, then use AdditionalKeys, fail again return \"\"\n\t\tif let itemDescription = try? valueContainer.decode(String.self, forKey: .itemDescription) {\n\t\t\tself.itemDescription = itemDescription\n\t\t} else {\n\t\t\tlet additionalValueContainer = try decoder.container(keyedBy: AdditionalKeys.self)\n\t\t\tself.itemDescription = (try? additionalValueContainer.decode(String.self, forKey: .itemDescription)) ?? \"\"\n\t\t}\n\t}\n}\n\n// This intermidiary object is needed because the wanted objects are wrapped inside a dictionary results:[iTunesItem]\nstruct StoreResults: Codable {\n\tlet results: [iTunesItem]\n}\n\nfunc fetchItunesItems(query: [String:String],completion: @escaping (StoreResults?) -> Void) {\n\tlet iTunesBaseUrl = URL(string: \"https://itunes.apple.com/search\")\n\tguard let iTunesSearchUrl = iTunesBaseUrl!.withQueries(query) else {\n\t\tcompletion(nil)\n\t\tprint(\"Invalid query\")\n\t\treturn\n\t}\n\tprint(iTunesSearchUrl)\n\t\n\tlet iTunesTask = URLSession.shared.dataTask(with: iTunesSearchUrl) { (data, response, error) in\n\t\tif let data = data {\n\t\t\tdo {\n\t\t\t\t//\t\tguard let string = String.init(data: data, encoding: .utf8) else { return }\n\t\t\t\t//\t\tprint(string)\n\t\t\t\tlet decoder = JSONDecoder()\n\t\t\t\tlet searchResultObject = try decoder.decode(StoreResults.self, from: data)\n\t\t\t\tcompletion(searchResultObject)\n\t\t\t} catch {\n\t\t\t\tprint(error.localizedDescription)\n\t\t\t\tcompletion(nil)\n\t\t\t}\n\t\t}\n\t}\n\tiTunesTask.resume()\n}\n\nvar iTunesQuery: [String:String] = [\n\t\"term\":\"Michael Jack\",\n\t\"country\":\"HK\",\n\t\"media\":\"all\"\n]\n\nfetchItunesItems(query: iTunesQuery) { (storeResults) in\n\tif let storeResults = storeResults {\n\t\tprint(storeResults.results)\n\t}\n\tprint(\"iTunes Task Completed\")\n\tPlaygroundPage.current.finishExecution()\n}\n\n\n"
+    }
+  ]
+}
