@@ -19,11 +19,7 @@
     },
     {
       "type": "text",
-      "data": "<div><span style=\"line-height: 1.4;\">But if you want to learn more, keep reading.</span></div>"
-    },
-    {
-      "type": "text",
-      "data": "<br>"
+      "data": "<div><span style=\"line-height: 1.4;\">But if you want to learn more, keep reading.</span><br><span style=\"line-height: 1.4;\"></span></div>"
     }
   ]
 }
