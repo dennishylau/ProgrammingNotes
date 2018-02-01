@@ -1,0 +1,10 @@
+{
+  "title": "Collapsible Block Using jQuery",
+  "cells": [
+    {
+      "type": "code",
+      "language": "html",
+      "data": "<!DOCTYPE html>\n<html>\n<head>\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<link rel=\"stylesheet\" href=\"https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css\">\n<script src=\"https://code.jquery.com/jquery-1.11.3.min.js\"></script>\n<script src=\"https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js\"></script>\n</head>\n<body>\n\n<div data-role=\"page\" id=\"pageone\">\n  <div data-role=\"header\">\n    <h1>Collapsible Blocks</h1>\n  </div>\n\n  <div data-role=\"main\" class=\"ui-content\">\n    <div data-role=\"collapsible\">\n      <h1>Click me - I'm collapsible!</h1>\n      <p>I'm the expanded content.</p>\n    </div>\n  </div>\n\n  <div data-role=\"footer\">\n    <h1>Insert Footer Text Here</h1>\n  </div>\n</div> \n\n</body>\n</html>"
+    }
+  ]
+}

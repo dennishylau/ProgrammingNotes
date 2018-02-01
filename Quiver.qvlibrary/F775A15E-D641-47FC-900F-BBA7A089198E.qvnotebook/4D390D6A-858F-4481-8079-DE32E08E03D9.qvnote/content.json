@@ -1,0 +1,62 @@
+{
+  "title": "Ch 027 System View Controllers",
+  "cells": [
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "import UIKit\nimport SafariServices\nimport MessageUI\n\nclass ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, MFMailComposeViewControllerDelegate {\n\t\n\t@IBOutlet weak var imageView: UIImageView!\n\n\toverride func viewDidLoad() {\n\t\tsuper.viewDidLoad()\n\t\tlet documentsDirectory = FileManager.default.urls(for: .documentDirectory,in: .userDomainMask).first!\n\t\tlet photoURL = documentsDirectory.appendingPathComponent(\"photo.jpg\")\n\t\timageView.image = UIImage(contentsOfFile: photoURL.path) ?? #imageLiteral(resourceName: \"fire\")\n\t}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>UIActivityViewController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "The sharing\u001b popup\u001b"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "\t@IBAction func shareButtonTapped(_ sender: UIButton) {\n\t\tguard let image = imageView.image else {return}\n\t\tlet activityController = UIActivityViewController(activityItems: [image], applicationActivities: nil)\n\t\tactivityController.popoverPresentationController?.sourceView = sender\n\t\t// only for ipad, popover emante and points to the calling button\n\t\tpresent(activityController, animated: true, completion: nil)\n\t}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>SFSafariViewController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Before using this, ViewController must <code>import SafariServices</code>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "\t@IBAction func safariButtonTapped(_ sender: Any) {\n\t\tguard let url = URL(string: \"http://resbo.com.hk\") else {return}\n\t\tlet safariViewController = SFSafariViewController(url: url)\n\t\tpresent(safariViewController, animated: true, completion: nil)\n\t}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>UIImagePickerControllerDelegate</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Before using this, the ViewController must adopt two protocols:<div><div><ol><li>UIImagePickerControllerDelegate: pass in image pinking data<br></li><li>UINavigationControllerDelegate: control navigation stack behaviour<br></li></ol></div><div>Also need to set the NSPhotoLibraryUsageDescription and the NSCameraUsageDescription keys in info.plist for permission</div></div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "\n\t@IBAction func cameraButtonTapped(_ sender: UIButton) {\n\t\t\n\t\tlet imagePicker = UIImagePickerController()\n\t\timagePicker.delegate = self\t\t\t\t// delegate receives notif of image-picking & controls dismiss of picker\n\n\t\t// Title and style of alert\n\t\tlet alertController = UIAlertController(title: \"Choose Image Source\", message: \"Pick from...?\", preferredStyle: .actionSheet)\n\t\talertController.popoverPresentationController?.sourceView = sender\n\n\t\t// Add camera button\n\t\tif UIImagePickerController.isSourceTypeAvailable(.camera) {\n\t\t\tlet cameraAction = UIAlertAction(title: \"Camera\", style: .default) { (action) in\n\t\t\t\timagePicker.sourceType = .camera\n\t\t\t\tself.present(imagePicker, animated: true, completion: nil)\n\t\t\t\tprint(\"User selected Camera\")\n\t\t\t}\n\t\t\talertController.addAction(cameraAction)\n\t\t}\n\n\t\t// Add photo library button\n\t\tif UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {\n\t\t\tlet photolibraryAction = UIAlertAction(title: \"Photo Library\", style: .default) { (action) in\n\t\t\t\timagePicker.sourceType = .photoLibrary\n\t\t\t\tself.present(imagePicker, animated: true, completion: nil)\n\t\t\t}\n\t\t\talertController.addAction(photolibraryAction)\n\t\t}\n\t\t\n\t\tlet cancelAction = UIAlertAction(title: \"Cancel\", style: .cancel, handler: nil)\n\t\talertController.addAction(cancelAction)\n\t\tpresent(alertController, animated: true, completion: nil)\n\t}\n\n\t\n\t// Call delegate method to auto dismiss picker and save to path\n\tfunc imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {\n\t\t\n\t\tlet documentsDirectory = FileManager.default.urls(for: .documentDirectory,in: .userDomainMask).first!\n\t\tlet photoURL = documentsDirectory.appendingPathComponent(\"photo.jpg\")\n\t\t\n\t\tguard let selectedPhoto = info[UIImagePickerControllerOriginalImage] as? UIImage else {return}\n\t\timageView.image = selectedPhoto\n\t\tdismiss(animated: true, completion: nil)\n\t\tif let data = UIImageJPEGRepresentation(selectedPhoto, 1) {\n\t\t\ttry? data.write(to: photoURL)\n\t\t}\n\t}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>MFMailComposeViewControllerDelegate</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Before using,&nbsp;<code>import MessageUI</code> and conform to&nbsp;<code>MFMailComposeViewControllerDelegate</code> protocol"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "\n\t@IBAction func emailButtonTapped(_ sender: Any) {\n\t\t\n\t\tif MFMailComposeViewController.canSendMail() {\n\t\t\tguard let imageData = imageView.image, let data = UIImageJPEGRepresentation(imageData,1) else {return}\n\t\t\tlet mailComposer = MFMailComposeViewController()\n\t\t\tmailComposer.mailComposeDelegate = self\n\t\t\tmailComposer.setToRecipients([\"dennishylau@gmail.com\"])\n\t\t\tmailComposer.setSubject(\"Nice Photo\")\n\t\t\tmailComposer.setMessageBody(\"Hello World.\", isHTML: false)\n\t\t\tmailComposer.addAttachmentData(data, mimeType: \"image/jpeg\", fileName: \"photo.jpg\")\n\t\t} else {\n\t\t\tlet alertController = UIAlertController(title: \"Can't Send Email\", message: \"System mail service not set up.\", preferredStyle: .alert)\n\t\t\tlet cancelAction = UIAlertAction(title: \"Cancel\", style: .cancel, handler: nil)\n\t\t\talertController.addAction(cancelAction)\n\t\t\tpresent(alertController, animated: true, completion: {\n\t\t\t\tDispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {\n\t\t\t\t\talertController.dismiss(animated: true, completion: nil)\n\t\t\t\t}\n\t\t\t})\n\t\t}\n\t}\n\t\n\t// Call delegate method to auto dismiss composer\n\tfunc mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {\n\t\tdismiss(animated: true, completion: nil)\n\t}\n}"
+    }
+  ]
+}

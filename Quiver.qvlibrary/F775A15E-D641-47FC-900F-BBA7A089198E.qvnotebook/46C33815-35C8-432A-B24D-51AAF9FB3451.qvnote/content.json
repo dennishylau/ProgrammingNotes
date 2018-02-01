@@ -1,0 +1,50 @@
+{
+  "title": "Ch 036 Concurrency & Synchronicity",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<div>For a more detailed view on the subject, see <a href=\"https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/Multithreading/AboutThreads/AboutThreads.html#//apple_ref/doc/uid/10000057i-CH6-SW2\">https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/Multithreading/AboutThreads/AboutThreads.html#//apple_ref/doc/uid/10000057i-CH6-SW2</a><br></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2><span style=\"font-size: 30px;\">Concurrency &amp; Parallelism</span></h2>"
+    },
+    {
+      "type": "text",
+      "data": "Concurrency: when an application is capable of executing two&nbsp;or more&nbsp;tasks virtually at same time. Tasks run looks like simultaneously, but it is possible that they may in fact be taking advantage of CPU time-slicing feature of operating system where each task run part of its task and then go to waiting state. By assigning CPU and other computing resources e.g. memory turn by turn to all tasks, it seems that all tasks are running in parallel to the end user. The other possible is that the application run parts of tasks or multiple tasks at the same time using multi-core infrastructure of CPU, by assigning one core to each task or sub-task.<div>Parallelism: requires hardware with multiple processing units, physically run parts of tasks or multiple tasks at the same time using multi-core infrastructure of CPU, by assigning one core to each task or sub-task. In single core CPU parallelism is impossible.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Thread &amp; Queue</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Thread: takes instructions that the processor will execute in order, one at a time. E.g. the iOS main thread, aka the UI thread, which is in charge of dispatching the events to the appropriate widget including the drawing events, and is responsible for processing the update for UI and all user interactions.</div><div>Queue:&nbsp;a data structure for holding&nbsp;instructions&nbsp;from the time they're sent until the thread retrieves and acts on them. E.g. the main thread has a main queue that stores upcoming&nbsp;instructions.</div><div>For example, user touches a button on screen, the UI thread dispatches the touch event to the app, which in turn sets its pressed state and posts an request to the event queue. After dispatching, the UI thread dequeues the request and notifies the widget to redraw itself.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Synchronicity and Threading</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div><b>Threads solve the specific problem of how to execute multiple code paths concurrently inside the same process.</b>&nbsp;For simplicity, concurrency here means parallelism. We're running applications on a multicore processor, where each core might even have its own multiple virual cores using technologies like Intel's Hyperthreading, so code can run concurrently and in parallel on different cores.<br></div><div>In a non-concurrent application, there is only one thread of execution, with a queue of instructions that the processor will execute in order, one at a time. That thread aka the main thread starts and ends with the application’s main routine, with a speical queue called the main queue with the highest priority of all queues, and branches one-by-one to implement different methods. It must respond to events such as user input, update the UI, and perform all of the computations all by itself. The problem is that it can only do one thing at a time. So when one of your computations takes a long time to finish, e.g. sending and receiving a network request, the main queue will be busy computing the values it needs. It will get clogged up, and the application will stop responding to user events and updating UI.</div><div>In contrast, an application that supports concurrency starts with one thread and adds more as needed to create additional execution paths. Each new path has its own custom start routine that runs independently of the code in the application’s main routine. With an&nbsp;<b>asychronous method call, t</b>he background queue takes the long-running code and execute them<b>&nbsp;</b>on the background thread, freeing up the main thread for user events and UI drawing. The OS manages these threads of execution, scheduling them to run on the available cores using multiprocessing technologies and preemptively interrupting them as needed to allow other threads to run.</div><div>From a technical standpoint, a thread is a combination of the kernel-level and application-level data structures needed to manage the execution of code. The kernel-level structures coordinate the dispatching of events to the thread and the preemptive scheduling of the thread on one of the available cores. The application-level structures include the call stack for storing function calls and the structures the application needs to manage and manipulate the thread’s attributes and state. In short, the application specifies which thread to dispatch to for each method, and the kernel does the coordination.</div><div>The problem with creating threads using custom code is that they are a low-level and complicated way to support concurrency in an application. Bad esign choices can cause synchronization or timing issues, resulting in a range of problems from subtle behavioral changes to the crashing of the application and the corruption of user data.<br></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Grand Central Dispatch</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Grand Central Dispatch is an alternative to defining custom threads. With GCD, you define the task you want to perform and add it to a work queue, which handles the scheduling of your task on an appropriate thread. Work queues take into account the number of available cores and the current load to execute your tasks more efficiently than you could do yourself using threads. To send interface code to the main queue, use the following:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "DispatchQueue.main.async {\n\t// main queue/ interface code\n}"
+    },
+    {
+      "type": "text",
+      "data": "The&nbsp;<code style=\"font-size: 16.200000762939453px;\">DispatchQueue</code>&nbsp;class works with all the queues,&nbsp;<code style=\"font-size: 16.200000762939453px;\">main</code>&nbsp;refers to the main queue, and&nbsp;<code style=\"font-size: 16.200000762939453px;\">async</code>&nbsp;tells the main queue to execute the code asynchronously. In computer terms, synchronously means finishing task A before running task B, while asynchronous means switching processing resources repidly between the two tasks so both can run seemingly at the same time."
+    }
+  ]
+}

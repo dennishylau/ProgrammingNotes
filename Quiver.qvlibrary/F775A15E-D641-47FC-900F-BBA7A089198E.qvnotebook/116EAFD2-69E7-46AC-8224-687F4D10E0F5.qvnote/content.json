@@ -1,0 +1,10 @@
+{
+  "title": "Extension: NSLayoutConstraint",
+  "cells": [
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "import Foundation\nimport UIKit\nextension NSLayoutConstraint {\n\t/**\n\tChange multiplier constraint\n\t\n\t- parameter multiplier: CGFloat\n\t- returns: NSLayoutConstraint\n\t*/\n\t\n\t// Aspect ratios are calculated x / y\n\t\n\tfunc setMultiplier(multiplier:CGFloat) {\n\t\t\n\t\tNSLayoutConstraint.deactivate([self])\n\t\t\n\t\tlet newConstraint = NSLayoutConstraint(\n\t\t\titem: firstItem!,\n\t\t\tattribute: firstAttribute,\n\t\t\trelatedBy: relation,\n\t\t\ttoItem: secondItem,\n\t\t\tattribute: secondAttribute,\n\t\t\tmultiplier: multiplier,\n\t\t\tconstant: constant)\n\t\t\n\t\tnewConstraint.priority = priority\n\t\tnewConstraint.shouldBeArchived = self.shouldBeArchived\n\t\tnewConstraint.identifier = self.identifier\n\t\t\n\t\tNSLayoutConstraint.activate([newConstraint])\n//\t\treturn newConstraint\n\t}\n}"
+    }
+  ]
+}

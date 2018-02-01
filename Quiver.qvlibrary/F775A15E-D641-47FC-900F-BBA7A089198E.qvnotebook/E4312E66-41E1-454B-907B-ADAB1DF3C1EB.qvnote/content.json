@@ -1,0 +1,65 @@
+{
+  "title": "Ch 036P Practice: iTunes Search",
+  "cells": [
+    {
+      "type": "text",
+      "data": "Goal: Produce an app that uses the iTunes Search API to search for media of type movies, music, apps and books. Search bar provides dynamic results while typing. Search results return title, description and an artwork. Artwork should be cached for faster loading."
+    },
+    {
+      "type": "text",
+      "data": "<img src=\"quiver-image-url/4E44F1B70F74F345031AAC3C42236452.jpg\" alt=\"IMG_5619.jpg\" width=\"554\" height=\"1200\"><br><div><br></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>TableViewController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>In&nbsp;<code>StoreItemListTableViewController</code>, the table view controller:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "import UIKit\nimport SafariServices\n\nclass StoreItemListTableViewController: UITableViewController {\n    \n    @IBOutlet weak var searchBar: UISearchBar!\n    @IBOutlet weak var filterSegmentedControl: UISegmentedControl!\n    \n    let storeItemController = StoreItemController()\n    \n\tvar items: [StoreItem] = []\n    \n    let queryOptions = [\"movie\", \"music\", \"software\", \"ebook\"]\n    \n    override func viewDidLoad() {\n        super.viewDidLoad()\n        \n    }\n    \n    // fetchMatchingItems() packages the user input into an argument for fetchItems(query:completion:)\n    func fetchMatchingItems() {\n        \n        self.items = []\n        self.tableView.reloadData()\n        \n        let searchTerm = searchBar.text ?? \"\"\n        let mediaType = queryOptions[filterSegmentedControl.selectedSegmentIndex]\n        \n        if !searchTerm.isEmpty {\n\t\t\t\n\t\t\tlet query: [String: String] = [\n\t\t\t\t\"term\": \"\\(searchTerm)\",\n\t\t\t\t\"media\": \"\\(mediaType)\",\n\t\t\t\t\"lang\": \"en_us\",\n\t\t\t\t\"limit\": \"100\"\n\t\t\t]\n\t\t\t\n\t\t\t\n\t\t\tstoreItemController.fetchItems(matching: query, completion: { (storeItems) in\n\t\t\t\tDispatchQueue.main.async {\n\t\t\t\t\tif let storeItems = storeItems {\n\t\t\t\t\t\tself.items = storeItems\n\t\t\t\t\t}\n\t\t\t\t\tself.tableView.reloadData()\n\t\t\t\t}\n\t\t\t})\n        }\n    }\n    \n    func configure(cell: UITableViewCell, forItemAt indexPath: IndexPath) {\n        \n        let item = items[indexPath.row]\n        \n        cell.textLabel?.text = item.name\n\t\tcell.detailTextLabel?.text = item.description\n\t\tcell.imageView?.image = #imageLiteral(resourceName: \"gray\")\n\t\t\n\t\t// remember, always update UI in main queue, otherwise the images will show up in the wrong cell\n\t\tlet imageDataTask = URLSession.shared.dataTask(with: item.artworkURL) { (data, response, error) in\n\t\t\tDispatchQueue.main.async {\n\t\t\t\tif let data = data {\n\t\t\t\t\tcell.imageView?.image = UIImage(data: data)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\t\n\t\timageDataTask.resume()\n        \n        // set label to the item's name\n        // set detail label to the item's subtitle\n        // reset the image view to the gray image\n        \n        // initialize a network task to fetch the item's artwork\n        // if successful, use the main queue capture the cell, to initialize a UIImage, and set the cell's image view's image to the \n        // resume the task\n    }\n    \n    @IBAction func filterOptionUpdated(_ sender: UISegmentedControl) {\n        \n        fetchMatchingItems()\n    }\n    \n    // MARK: - Table view data source\n\n    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {\n\n        return items.count\n    }\n\n    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {\n        \n        let cell = tableView.dequeueReusableCell(withIdentifier: \"itemCell\", for: indexPath)\n        configure(cell: cell, forItemAt: indexPath)\n\n        return cell\n    }\n    \n    // MARK: - Table view delegate\n    \n    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {\n        let item = items[indexPath.row]\n\t\tlet url = item.trackViewUrl\n\t\tprint(url)\n\t\tlet safariViewController = SFSafariViewController(url: url)\n\t\tpresent(safariViewController, animated: true) {\n\t\t\tDispatchQueue.main.async {\n\t\t\t\tsafariViewController.dismiss(animated: true, completion: nil)\n\t\t\t}\n\t\t}\n        tableView.deselectRow(at: indexPath, animated: true)\n    }\n}\n\n// Delegate used so the search button in the keyboard calls fetchMatchingItems() and searchBar text change does the same\nextension StoreItemListTableViewController: UISearchBarDelegate {\n\n    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {\n        \n        fetchMatchingItems()\n        searchBar.resignFirstResponder()\n    }\n\t\n\tfunc searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {\n\t\tfetchMatchingItems()\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>ObjectController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div><code>StoreItemController</code>, which takes in an array of query dictionaries and return an array of <code>StoreItem</code> using completion handler.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "import Foundation\nstruct StoreItemController{\n\tfunc fetchItems(matching query: [String: String], completion: @escaping ([StoreItem]?) -> Void) {\n\t\t\n\t\tlet baseURL = URL(string: \"https://itunes.apple.com/search?\")!\n\t\t\n\t\tguard let url = baseURL.withQueries(query) else {\n\t\t\t\n\t\t\tcompletion(nil)\n\t\t\tprint(\"Unable to build URL with supplied queries.\")\n\t\t\treturn\n\t\t}\n\t\t\n\t\tlet task = URLSession.shared.dataTask(with: url) { (data, response, error) in\n\t\t\t\n\t\t\tif let data = data,\n\t\t\t\tlet rawJSON = try? JSONSerialization.jsonObject(with: data),\n\t\t\t\tlet json = rawJSON as? [String: Any],\n\t\t\t\tlet resultsArray = json[\"results\"] as? [[String: Any]] {\n\t\t\t\t\n\t\t\t\tlet storeItems = resultsArray.flatMap { StoreItem(json: $0) }\n\t\t\t\tcompletion(storeItems)\n\t\t\t\t\n\t\t\t\t/* What's going on above?\n\t\t\t\t\trawJSON = \t{\n\t\t\t\t\t\t\t\t\tresultCount = 9;\n\t\t\t\t\t\t\t\t\tresults = (\n\t\t\t\t\t\t\t\t\t\t{item1Dictionary},\n\t\t\t\t\t\t\t\t\t\t{item2Dictionary}\n\t\t\t\t\t\t\t\t\t)\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\n\t\t\t\t\tconverted into an array\n\t\t\t\t\tjson =\t[\n\t\t\t\t\t\t\t\t\"results\":NSArray({item1Dictionary},{item2Dictionary}),\n\t\t\t\t\t\t\t\t\"resultCount\":9\n\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t\n\t\t\t\t\tOnly take the results\n\t\t\t\t\tresultsArray = \t[[item1Dictionary],[item2Dictionary]]\n\t\t\t\t\t\n\t\t\t\t\tinit StoreItem with each of [itemNDictionary], then use flatMap instead of map to change into non-optional; remember only flatMap after init, otherwise the arrays within array will be flattened\n\t\t\t\t\tresultsArray.flatMap { StoreItem(json: $0) }\n\t\t\t\t\t\n\t\t\t\t\tWith this method, CodingKeys are not needed, as seen in the StoreItem initializer\n\t\t\t\t*/\n\t\t\t\t\n\t\t\t} else {\n\t\t\t\tprint(\"Either no data was returned, or data was not serialized.\")\n\t\t\t\t\n\t\t\t\tcompletion(nil)\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\t\n\t\ttask.resume()\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Model Object</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div><code>StoreItem</code>, the model object<br></div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "import Foundation\nstruct StoreItem {\n\t\n\tvar name: String\n\tvar artist: String\n\tvar description: String\n\tvar kind: String\n\tvar artworkURL: URL\n\tvar trackViewUrl: URL\n\t\n\tinit?(json: [String: Any]) {\n\t\t\n\t\tguard let name = json[\"trackName\"] as? String,\n\t\t\tlet artist = json[\"artistName\"] as? String,\n\t\t\tlet kind = json[\"kind\"] as? String,\n\t\t\tlet artworkURLString = json[\"artworkUrl100\"] as? String,\n\t\t\tlet artworkURL = URL(string: artworkURLString),\n\t\t\tlet trackViewUrlString = json[\"trackViewUrl\"] as? String,\n\t\t\tlet trackViewUrl = URL(string: trackViewUrlString)\n\t\telse { return nil }\n\t\t\n\t\tself.name = name\n\t\tself.artist = artist\n\t\tself.kind = kind\n\t\tself.artworkURL = artworkURL\n\t\tself.trackViewUrl = trackViewUrl\n\t\t\n\t\tself.description = json[\"description\"] as? String ?? json[\"longDescription\"] as? String ?? \"\"\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Cache</h2>"
+    },
+    {
+      "type": "text",
+      "data": "In&nbsp;<code>AppDelegate</code>&nbsp;function&nbsp;<code>didFinishLaunchingWithOptions</code>​ to enable caching"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let temporaryDirectory = NSTemporaryDirectory()\nlet urlCache = URLCache(memoryCapacity: 25000000, diskCapacity: 50000000, diskPath: temporaryDirectory)\nURLCache.shared = urlCache"
+    }
+  ]
+}

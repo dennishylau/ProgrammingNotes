@@ -1,0 +1,35 @@
+{
+  "title": "Ch 032 Extension",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<div>Extensions are use to add these to defined types:</div><div><ol><li>Methods<br></li><li>Computed properties<br></li><li>Initializers<br></li><li>Conformation to protocols<br></li></ol></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Methods</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "extension String {\n\tmutating func plurialize() {\n\t\treturn self.append(\"s\")\n\t}\n}\nvar song = \"Song\"\nsong.plurialize()"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Computed Properties<br></h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "extension UIColor {\n\tstatic var favoriteColor: UIColor {\n\t\treturn UIColor(red: 0.9, green: 0.1, blue: 0.9, alpha: 0.5)\n\t}\n}\nUIColor.favoriteColor"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Initializers &amp; Protocols</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Basically, in the class / struct { }, just define properties<br></div><div>Use extension for func and protocols</div>"
+    }
+  ]
+}

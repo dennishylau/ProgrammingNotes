@@ -1,0 +1,85 @@
+{
+  "title": "Ch 028 Passing Info Among VC",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<div>There are multiple ways to pass information to other VCs:</div><div><ol><li>Forward segue, using prepared for&nbsp;<code>prepare(segue:sender:)</code>.</li><li>Unwind segue.</li><li>Use a property on a shared instance of a model object controller. Simpler to write but can be more difficult to change logic and code in the future.</li><li>Delegate. More scalable but more complex.</li></ol>To read more about this, see&nbsp;<a href=\"quiver-file-url/8788EEABB257415844F6DBC4E32EDC10.pdf\">Passing Data Between View Controllers Best Practices.pdf</a>.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Designing a Delegate</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Use prepare(for segue) to pass info from MainVC to SecondVC.<br></div><div>Use delegate to pass info in reverse, or when a segue is not used (e.g. separate workflow / user story), from a SourceVC to a TargetVC.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Flow</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<div>In Protocol:</div><div><ul><li>Define required function:&nbsp;</li></ul></div>In SourceVC:<div><ul><li>Add property: <code>var delegate: SomeDelegate?</code></li><li>Call method: <code>delegate?.someFunc(parameter:)</code><br></li><li>​Pass object by calling said method</li></ul>In TargetVC:</div><div><ul><li>Implement function: <code>func someFunction(_ theObject: Int) { self.theObject = theObject }</code></li></ul>​Either by using a segue or via the TabBarController &amp; NavigationController:<br></div><div><ul><li>Define delegate object</li></ul></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Example</h4>"
+    },
+    {
+      "type": "text",
+      "data": "First, define a protocol."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "protocol SourceVCDelegate {\n\tfunc someFunction(_ theObject: Int)\n}\n"
+    },
+    {
+      "type": "text",
+      "data": "<div>&nbsp;Second, set up the delegate property in the SourceVC.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class SourceVC: UIViewController {\n\tvar theObject: Int?\n\tvar delegate: SourceVCDelegate?\n\t\n\tfunc someFuncAfterHavingInfo() {\n\t\tguard let theObject = theObject else {return}\n\t\tdelegate?.someFunction(theObject)\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<div>Third, define the delegate object as the instance of the&nbsp;TargetVC. There are different ways to do this.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>With Segue</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class TargetVC: UIViewController, SourceVCDelegate {\n\tvar theObject: Int?\n\t\n\t// Delegate setup done here\n\toverride func prepare(for segue: UIStoryboardSegue, sender: Any?) {\n\t\tif segue.identifier == \"SegueToSecondVC\" {\n\t\t\tlet sourceVC = segue.destination as! SourceVC\n\t\t\tsourceVC.delegate = self\n\t\t}\n\t}\n\t\n\tfunc someFunction(_ theObject: Int) {\n\t\tself.theObject = theObject\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Without Segue</h4>"
+    },
+    {
+      "type": "text",
+      "data": "E.g. when the VCs are structured like this:"
+    },
+    {
+      "type": "text",
+      "data": "<div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; → &nbsp; &nbsp; &nbsp; &nbsp; Navigation Controller &nbsp; &nbsp; &nbsp;→ &nbsp; &nbsp; &nbsp;... &nbsp; &nbsp; &nbsp;→ &nbsp; &nbsp; SourceVC</div><div>Tab Bar Controller</div><div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; → &nbsp; &nbsp; &nbsp; &nbsp; Navigation Controller &nbsp; &nbsp; &nbsp;→ &nbsp; &nbsp;TargetVC</div>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Use a function like this in the SourceVC using the <code>tabBarController</code> and the <code>navController</code>:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func setupDelegate() {\n\tguard let navController = tabBarController?.viewControllers?.last as? UINavigationController,\n\t\t// Selecting the last root view controller\n\t\tlet targetVC = navController.viewControllers.first as? TargetVC\n\t\t// Selecting the first view controller in the navigation controller stack, i.e. root view controller\n\t\telse {return}\n\tdelegate = targetVC\n}"
+    },
+    {
+      "type": "text",
+      "data": "Call this in <code>viewDidLoad</code>, and conform TargetVC to SourceVCDelegate."
+    }
+  ]
+}

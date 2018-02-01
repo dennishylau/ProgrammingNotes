@@ -1,0 +1,36 @@
+{
+  "title": "Extension: URL",
+  "cells": [
+    {
+      "type": "text",
+      "data": "For for generating query URLs"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "extension URL {\n\tfunc withQueries(_ queries: [String:String]) -> URL? {\n\t\tvar components = URLComponents(url: self, resolvingAgainstBaseURL: true)\n\t\tcomponents?.queryItems = queries.flatMap { URLQueryItem(name: $0.0, value: $0.1) }\n\t\t// This takes out each non-optional key:value pair in the array and init URLQueryItem with them\n\t\treturn components?.url\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "For generating HTTPS URLs"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "extension URL {\n\tfunc withHTTPS() -> URL? {\n\t\tvar components = URLComponents(url: self, resolvingAgainstBaseURL: true)\n\t\tcomponents?.scheme = \"https\"\n\t\t// This forces the use of https\n\t\treturn components?.url\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "For switching host aka domain"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let imageURL = URL(string: \"http://localhost:8090/images/\")\nvar imageURLComponents = URLComponents.init(url: imageURL!, resolvingAgainstBaseURL: true)\nimageURLComponents?.host = \"denniss-macbook-pro.local\"\n// imageURLComponents?.url returns http://denniss-macbook-pro.local:8090/images/"
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}

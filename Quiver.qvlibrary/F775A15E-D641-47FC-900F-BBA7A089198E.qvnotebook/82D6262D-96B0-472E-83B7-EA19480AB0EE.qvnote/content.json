@@ -1,0 +1,74 @@
+{
+  "title": "Ch 034 URLSession & HTTP",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>What is a URL</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>A uniform ressource locator has two parts:</div><div>E.g. http://apple.com</div><div>&nbsp; &nbsp; &nbsp; &nbsp; |__1___|____2___|</div><div><ol><li>Protocol<br></li><li>Domain<br></li></ol></div><div>They can have more complex structure with subdomains, ports, paths, or query parameters</div><div>https://itunes.apple.com/us/app/keynote/id12345?mt=12&amp;page=2</div><div>|___1___|__2___|____3_____|_____________4____________|_______5_______|</div><div><ol><li>Protocol<br></li><li>Subdomain<br></li><li>Domain<br></li><li>Path<br></li><li>Query<br></li></ol></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Percent Encoding</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>URL has it's own set of escape characters beginning with the %</div><div>E.g. %20: space</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Request Type, Headers &amp; Body</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Request Type\u001b (HTTP Methods)</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<div></div><div>The most common types are GET and POST\u001b</div><div>GET: request info from server\u001b</div><div>POST: sending info to server</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Headers</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Like query, headers basically work like a dictionary with key=value pairs\u001b that tells ther server how to handle request</div><div>E.g. the header parameter User-Agent describes the web browser calling the request</div><div>Headers can also be used for authentication and cookies</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Body</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<div>All the data contained within the request.</div><div>E.g. the html, CSS and JS files</div><div>When an app sends a POST request, it sends a body of information, e.g. plain text, JSON (JavaScript Object Notation), or any file to the server\u001b</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>URLSession</h2>"
+    },
+    {
+      "type": "text",
+      "data": "URLSession is used by adding a data task to a shared <code>URLSession</code> instance, then calling <code>resume()</code>"
+    },
+    {
+      "type": "text",
+      "data": "One thing to note is that URLSession and it's completion handler runs on a background queue, so UI updates should not be called without explicitly dispatching on the main queue. For details see&nbsp;<a href=\"quiver-note-url/46C33815-35C8-432A-B24D-51AAF9FB3451\">Ch 036 Concurrency &amp; Synchronicity</a>."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let baseURL: URL = URL(string: \"http://example.com\")!\nlet requestURL: URL = baseURL.appendingPathComponent(\"somepath\")!\n// requestURL becomes http://example.com/somepath\n\nlet task = URLSession.shared.dataTask(with: requestURL!) { (data, response, error) in\n\tif let data = data {\n\t\t// Code here\n\t}\n}\ntask.resume()"
+    },
+    {
+      "type": "text",
+      "data": "<h2>HTTP vs HTTPS</h2>"
+    },
+    {
+      "type": "text",
+      "data": "If HTTP is used instead of HTTPS, App Transport Security, a security measure that checks network security, will kick in and block the request. To get around it, open&nbsp;<code style=\"font-size: 16.200000762939453px;\">Info.plist</code>,&nbsp;<code style=\"font-size: 16.200000762939453px;\">​</code>​add a new item App Transport Security Settings, then under it add&nbsp;<code style=\"font-size: 16.200000762939453px;\">Allow Arbitrary Loads: Bool = Yes</code>​."
+    }
+  ]
+}

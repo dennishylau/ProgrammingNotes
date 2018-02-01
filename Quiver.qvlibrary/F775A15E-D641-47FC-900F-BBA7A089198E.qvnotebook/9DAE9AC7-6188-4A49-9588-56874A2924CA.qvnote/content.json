@@ -1,0 +1,74 @@
+{
+  "title": "Ch 033 UIKit Animation",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Animatable Properties</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>These properties are animatable<br><ul><li>frames<br></li><li>bounds<br></li><li>center<br></li><li>transform<br></li><li>alpha<br></li><li>backgroundColor<br></li><li>NSLayoutConstraint<br></li></ul></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Frames VS Bounds</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Frame: coordinates of view relative to its superview's 0,0. Its size is the smallest upright rectangle that can contain the entirity of the view, despite it possibly being rotated</div><div>Bounds: coordinates of view within itself. Despite the view being possibly rotated, in terms of bounds, content of the view is always upright, and upper left corner is 0,0</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>animate withDuration</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "import PlaygroundSupport\n\nlet view = UIView()\n\nUIView.animate(withDuration: 2) {\n\tview.alpha = 0.3\n}\n\n// Define a frame and then init a UIView from frame\nlet liveViewFrame = CGRect(x: 0, y: 0, width: 300, height: 300)\nlet liveView = UIView(frame: liveViewFrame)\nliveView.backgroundColor = .white\n\nPlaygroundPage.current.liveView = liveView\n\n// Same here, then add it as subview to liveView\nlet squareFrame = CGRect(x: 0, y: 0, width: 100, height: 100)\nlet square = UIView(frame: squareFrame)\nsquare.backgroundColor = .purple\nliveView.addSubview(square)\n\n/*:\n\n\tUIView.animate(withDuration: 3) {\n\t\tsquare.backgroundColor = .orange\n\t\tsquare.center = liveView.center\n\t}\n*/"
+    },
+    {
+      "type": "text",
+      "data": "<h2>animate withDuration options</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// Method with completion handler\nUIView.animate(withDuration: 3, animations: {\n\t// put animation here\n}) { (_) in\n\t// execute only after the animation\n}\n\n// Method with options\nUIView.animate(withDuration: 2, delay: 0, options: [.repeat, .autoreverse], animations: {\n\t// delay here means initial delay before the animation\n\tsquare.backgroundColor = .orange\n\tsquare.alpha = 0.5\n\tsquare.center = liveView.center\n//\tsquare.frame = CGRect(x: 200, y: 0, width: 100, height: 100)\n})\n\n// If a delay is needed in between parts of the animation, use UIView.addKeyframeWithRelativeStartTime\n"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Transform</h2>"
+    },
+    {
+      "type": "text",
+      "data": "There are 3 types: scale, rotate and translate (move)"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let scaleTransform = CGAffineTransform(scaleX: 0.8, y: 0.8)\n// rotatation in radian, positive is counterclockwise\nlet rotateTransform = CGAffineTransform(rotationAngle: .pi)\nlet translateTransform = CGAffineTransform(translationX: 100, y: 100)\nlet comboTransform =  scaleTransform.concatenating(rotateTransform).concatenating(translateTransform)\nUIView.animate(withDuration: 2, animations: {\n\tsquare.transform = comboTransform\n}) { (_) in\n\tUIView.animate(withDuration: 2, animations: {\n\t\tsquare.transform = CGAffineTransform.identity\n\t})\n}\n// Use CGAffineTransform.identity to undo all transformation"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Constraints</h2>"
+    },
+    {
+      "type": "text",
+      "data": "First declare this:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "@IBOutlet weak var someConstraint: NSLayoutConstraint!"
+    },
+    {
+      "type": "text",
+      "data": "<div>Pick the constraint, then open Connection Inspector, connect the outlet</div><div>Set someConstraint.constant or someConstraint.relation and change value, then animate</div><div>Finally, call:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "self.view.layoutIfNeeded()"
+    }
+  ]
+}

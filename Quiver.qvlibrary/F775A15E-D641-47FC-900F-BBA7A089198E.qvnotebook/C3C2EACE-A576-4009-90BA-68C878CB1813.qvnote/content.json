@@ -1,0 +1,274 @@
+{
+  "title": "Tricks",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Framework V. Library</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Library: You want soemthing done to your input, you call the library, bam job done</div><div>E.g. Swift Standard Library, round down Double to Int: Int(3.14) -> 3</div><div>Framework: The skeleton is there, you fill in the white space, the framework calls your input, bam job done</div><div>E.g. UIKit, viewDidLoad() will always be called, you put code into it to let the framework call it</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Method Naming Convention</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>In swift, with a present tense verb like sort or reverse it is a mutating function (the original collection is modified), whereas if you have a past participle or gerund, like enumerated, appending or sorted then you are getting a copy.</div><div>In cases where this is ambiguous because the operation is already a noun, like union the mutating version is named with form: formUnion.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Class V. Protocol</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Class: inheritance from superclass to sunclass; defines methods and properties within; the *implementor* of protocol</div><div>Protocol: by composition, no need to consider inheritance hierachy; define general conformity requirements about *what* methods and properties are needed to do task, but not *how* the method is written to do said task; the \"interface\" definition</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>LaunchScreen Status Bar Sytle</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Go to&nbsp;<code>info.plist</code>, add&nbsp;<code>Status bar is initially hidden = true</code>, then to restore after launching, go to&nbsp;<code>AppDelegate</code> <code>didFinishLaunchingWithOptions</code>:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "UIApplication.shared.isStatusBarHidden = false"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Change Status Bar Color On Condition</h3>"
+    },
+    {
+      "type": "text",
+      "data": "Go to <code>info.plist</code>, add <code>View controller-based status bar appearance = No</code>, then in the specific VC's <code>viewDidLoad</code>:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "if condition {\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.default\n} else {\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent\n}\n\n// Alternatively\n\noverride func viewWillAppear(_ animated: Bool) {\n\tsuper.viewWillAppear(animated)\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent\n}\n\noverride func viewWillDisappear(_ animated: Bool) {\n\tsuper.viewWillDisappear(animated)\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.default\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Create Random Number</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let randomNum = arc4random_uniform(UInt32(1000))\t// Foundation, arugment UInt32(NUM_UPPER_BOUND)\nInt(arc4random_uniform(6) + 1)\t\t\t\t\t\t// Random 1...6"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Create Delay</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {\t\t\t//This creates the delay for 3s\n\t// put code here\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Enable Zooming &amp; Scrolling</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class ZoomViewController: UIViewController, UIScrollViewDelegate {\n\t\n\t@IBOutlet weak var scrollView: UIScrollView!\n\t@IBOutlet weak var imageView: UIImageView!\n\t\n\toverride func viewDidLoad() {\n\t\tsuper.viewDidLoad()\n\t\timageView.image = #imageLiteral(resourceName: \"iphoneResolution\")\n\t\tscrollView.delegate = self\n\t\t\n\t\t// set VC instance as the delegate of scrollView\n\t\t\n\t\tinitZoomFor(view.bounds.size)\n\t}\n\t\n\t\n\tfunc viewForZooming(in scrollView: UIScrollView) -> UIView? {\n\t\treturn imageView\n\t}\n\t\n\tfunc initZoomFor(_ size: CGSize) {\n\t\t\n\t\t//\t\tdivide screen size by image size\n\t\t\n\t\tlet widthScale = size.width / imageView.bounds.width\n\t\tlet heightScale = size.height / imageView.bounds.height\n\t\t\n\t\t//\t\tget min of two so entire image will show\n\t\t\n\t\tlet scale = min(widthScale, heightScale)\n\t\t\n\t\tscrollView.minimumZoomScale = scale\n\t\tscrollView.zoomScale = scale\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>TableView IndexPath, Segue, and Peek &amp; Pop</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Normally, without peek and pop, this works:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "guard let indexPath = tableView.indexPathForSelectedRow else { return }"
+    },
+    {
+      "type": "text",
+      "data": "<div>But with pee and pop, use this:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let cell = sender as! UITableViewCell\nlet indexPath = tableView.indexPath(for: cell)"
+    },
+    {
+      "type": "text",
+      "data": "<h2>BarButton System Item &amp; Dismiss Modal VC</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func viewDidLoad() {\n\tsuper.viewDidLoad()\n\tif let modelObject = modelObject {\n\t// Do something\n\t} else {\n\t\tnavigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismissVC))\n\t}\n}\n\n@objc func dismissVC() {\n\tself.dismiss(animated: true, completion: nil)\n}\n"
+    },
+    {
+      "type": "text",
+      "data": "<h2>TV Cell Auto Resize Fail</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Set TV estimate height higher</div><div>Set Content Compression Resistance Priority to 1000</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Debug Auto Layout Using LLDB</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Add symbolic breakpoint:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "symbol: UIViewAlertForUnsatisfiableConstraints\naction: debugger command\ncommand: expr -l objc++ -O -- [[UIWindow keyWindow] _autolayoutTrace]"
+    },
+    {
+      "type": "text",
+      "data": "<div>In LLDB console:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "expr -l Swift -- import UIKit\nexpr -l Swift -- unsafeBitCast(0x7f88a8cc2050, to: UIView.self).backgroundColor = UIColor.red"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Create Infinite Loop</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { (_) in\n\t// Block of code here\n}\ntimer.invalidate()"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Show Network Indicator</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Remember to set to false at some point in implementation."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "UIApplication.shared.isNetworkActivityIndicatorVisible = true"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Adjust UIImageView Aspect Ratio To Fit Image</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Requires <code>setMultiplier</code> in&nbsp;<a href=\"quiver-note-url/116EAFD2-69E7-46AC-8224-687F4D10E0F5\">Extension: NSLayoutConstraint</a>."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "if let image = image {\n\tlet aspectRatio: CGFloat = image.size.width / image.size.height\n\tself.apodImageAspectConstraint.setMultiplier(multiplier: aspectRatio)\n\tself.view.layoutIfNeeded()\n\tself.someModelObject.image = image\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Haptic Feedback Using UIFeedbackGenerator</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let impact = UIImpactFeedbackGenerator(style: .heavy)\t\t// The normal type, use for button press etc., can set strength\nlet selection = UISelectionFeedbackGenerator()\t\t\t\t// Weak ass type, use for slider selection etc.\nlet notification = UINotificationFeedbackGenerator()\t\t// Weaird ass type, with system predefined vibration pattern, use to convey success, warning or error\nimpact.impactOccurred()\nselection.selectionChanged()\nnotification.notificationOccurred(.error)"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Tab Bar Badge</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Call this method when array is updated."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func updateBadgeNumber() {\n\tlet badgeValue = someArray.count > 0 ? \"\\(someArray.count)\" : nil\n\tnavigationController?.tabBarItem.badgeValue = badgeValue\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Animate Badge</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Call&nbsp;<code>animateTabBarBadgeAt(tabNumber:)</code> upon update."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func animateTabBarBadgeAt(tabNumber: Int) {\n\t\n\t// tabNumber starts with 1\n\tguard let view = self.tabBarController?.tabBar.subviews[tabNumber] else {return}\n\t\n\tfor subview in (view.subviews) {\n\t\tlet viewType = String(describing: type(of: subview))\n\t\tif viewType == \"_UIBadgeView\" {\n\t\t\tanimateView(view: subview)\n\t\t}\n\t}\n}\n\nfunc animateView(view:UIView){\n\t\n\t// Must call layoutIfNeeded first to have it init at the right position\n\tview.layer.layoutIfNeeded()\n\t\n\t// Horizontal shake\n\tlet shakeAnimation = CABasicAnimation(keyPath: \"position\")\n\tshakeAnimation.duration = 0.04\n\tshakeAnimation.repeatCount = 4\n\tshakeAnimation.autoreverses = true\n\tshakeAnimation.fromValue = NSValue(cgPoint: CGPoint(x:view.center.x - 1, y:view.center.y))\n\tshakeAnimation.toValue = NSValue(cgPoint: CGPoint(x:view.center.x + 1, y:view.center.y))\n\tview.layer.add(shakeAnimation, forKey: \"position\")\n\t\n\t// Scale once without the translation, scale every time with it\n\tlet scaleTransform = CGAffineTransform(scaleX: 1.2, y: 1.2)\n\tlet translateTransform = CGAffineTransform(translationX: view.layer.frame.width * 0.1, y: view.layer.frame.height * 0.1)\n\tview.layer.transform = CATransform3DMakeAffineTransform(translateTransform)\n\tUIView.animate(withDuration: 0.3, animations: {\n\t\tview.layer.transform = CATransform3DMakeAffineTransform(scaleTransform)\n\t})\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Use Large Title In Navigation Bar</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Check Prefers Larger Titles in Navigation Bar.&nbsp;<div>To use regular title size in other VC, call <code>navigationItem.largeTitleDisplayMode = .never​</code> in <code>viewDidLoad</code></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>UITextView Initial Position At Top</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Text View does not always default to the top scroll position. Call this."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func viewDidLayoutSubviews() {\n\tsuper.viewDidLayoutSubviews()\n\titemDescription.setContentOffset(CGPoint.zero, animated: false)\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Set View Corner Radius</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func viewDidLoad() {\n\tsomeView.layer.cornerRadius = 3\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>UITextView Flash Scroll Indicator</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func viewDidLayoutSubviews() {\n\tsuper.viewDidLayoutSubviews()\n// Flash scroll indicator if content long enough for scroll\n\titemDescription.layoutIfNeeded()\n\t// This line is needed because the autolayout constraints may not be in effect yet\n\tlet contentHeight = itemDescription.contentSize.height\n\tlet viewHeight = itemDescription.frame.height\n\tif contentHeight > viewHeight {\n\t\titemDescription.flashScrollIndicators()\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Pull To Refresh</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "@IBOutlet weak var refresher: UIRefreshControl!\n@IBAction func refreshControlActivated(_ sender:UIRefreshControl) {\n\tlet refreshingString = NSAttributedString(string: \"Refreshing\", attributes: [NSAttributedStringKey.font : UIFont.systemFont(ofSize: 18)])\n\tlet refreshDefaultString = NSAttributedString(string: \"Pull Down To Refresh\", attributes: [NSAttributedStringKey.font : UIFont.systemFont(ofSize: 12)])\n\trefresher.attributedTitle = refreshingString\n\ttableView.reloadData()\n\tDispatchQueue.main.asyncAfter(deadline: .now() + 1.3) {\n\t// dummy here, only creates delay\n\t\tsender.endRefreshing()\n\t\tself.refresher.attributedTitle = refreshDefaultString\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Enable Cache</h2>"
+    },
+    {
+      "type": "text",
+      "data": "In <code>AppDelegate</code> function <code>didFinishLaunchingWithOptions</code>​ to enable caching, number in bytes."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let temporaryDirectory = NSTemporaryDirectory()\nlet urlCache = URLCache(memoryCapacity: 25000000, diskCapacity: 50000000, diskPath: temporaryDirectory)\nURLCache.shared = urlCache"
+    }
+  ]
+}

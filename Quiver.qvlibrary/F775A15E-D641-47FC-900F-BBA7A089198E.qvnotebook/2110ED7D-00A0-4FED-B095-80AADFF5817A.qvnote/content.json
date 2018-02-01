@@ -1,0 +1,14 @@
+{
+  "title": "Ch 035.3 Encoding JSON & HTTP POST",
+  "cells": [
+    {
+      "type": "text",
+      "data": "A HTTP <code>POST</code> method is quite different from a <code>GET</code> in that:<div><ol><li><code>URLSession</code> default to <code>GET</code>, so the request requires explicit declaration as a <code>POST</code></li><li>Need to indicate the kind of data sent using the <code>Header</code></li><li>Data needs to be encoded into a JSON object, and placed into the <code>Body</code> of the request</li></ol></div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func sumbitOrder(menuIds: [Int], completion: @escaping(Int?) -> Void) {\n\tlet orderURL = baseURL.appendingPathComponent(\"order\")\n\tvar request = URLRequest(url: orderURL)\n\n\trequest.httpMethod = \"POST\"\n\trequest.setValue(\"application/json\", forHTTPHeaderField: \"Content-Type\")\n\t\n\tvar data: [String:Any] = [\"menuIds\": menuIds]\n\tlet jsonEncoder = JSONEncoder()\n\tlet jsonData = try? jsonEncoder.encode(data)\n\trequest.httpBody = jsonData\n\t\n\tlet orderDataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in\n\t\t// parse response\n\t}\n\torderDataTask.resume()\n}"
+    }
+  ]
+}

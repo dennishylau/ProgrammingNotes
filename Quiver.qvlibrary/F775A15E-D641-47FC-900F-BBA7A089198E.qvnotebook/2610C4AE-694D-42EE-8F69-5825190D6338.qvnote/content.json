@@ -1,0 +1,49 @@
+{
+  "title": "Ch 030 Collection Functions",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Sorted</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let family: [String] = [\"Mark\",\"Cindy\",\"Karen\",\"Dennis\"]\n\n// The lengthy way\nfamily.sorted { (name1, name2) -> Bool in\n\treturn name1 < name2\n}\n\n// The modular way\nlet forwards = { (name1: String, name2: String) -> Bool in\n\tprint(name1)\n\tprint(name2)\n\treturn name1 < name2\n}\nfamily.sorted(by: forwards)\n\n// The short hand\nprint(family.sorted {$0 < $1})\n"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Map &amp; FlatMap</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Map takes each item in an array and perform the action specified in the closure</div><div>FlatMap flattens the arrays by combining the contents of nested array, and disregards optionals</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// E.g.1\nlet names: [String] = [\"Jon\",\"Sam\",\"Abe\",\"Mac\"]\nlet fullName = names.map { (name) -> String in\n\treturn name + \" Smith\"\n}\nprint(names.map {$0 + \" Smith\"})\n\n// E.g.2\nlet matrixR1 = [1,2,3]\nlet matrixR2 = [4,5,6]\nlet matrix = [matrixR1,matrixR2]\nprint(matrix.map {$0[1] + 1})\t\t\t\t// [3,6]\nprint(matrix.flatMap {$0})\t\t\t\t\t// [1,2,3,4,5,6]"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Filter<br></h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let numbers: [Int] = [1,5,10,15,20,25,30]\n\n// filter out those below 15\nnumbers.filter { (number) -> Bool in\n\treturn number >= 15\n}\n\n// print those below 15\nprint(numbers.filter {$0 < 15})\t\t\t\t// [1,5,10]"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Reduce</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Take in an init value, then sum all in array onto init value<br></div><div>Here init value is -106, sum of the numbers array is 106, so total is 0</div><div>Here $0 actually refers to the intermediate result, with the init being -106</div><div>I.e. -106 is the first $0, -106 + 1 = -105, which becomes the new $0</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "print(numbers.reduce(-106) { $0 + $1 })\t\t// result is 0"
+    }
+  ]
+}

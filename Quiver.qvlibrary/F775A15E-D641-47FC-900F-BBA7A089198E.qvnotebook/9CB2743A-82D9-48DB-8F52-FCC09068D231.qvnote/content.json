@@ -1,0 +1,341 @@
+{
+  "title": "Ch 037P Practice: Guided Project 5",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Server Endpoints</h2><h2></h2>"
+    },
+    {
+      "type": "text",
+      "data": "/categories: GET request, structured in {\"categories\":[CategoryString]}<div>/menu: GET request, structured in {\"items':[{itemDictionary}]}, takes query parameter \"category\"</div><div>/images: GET request, to be used combined with the image name, use PNG</div><div>/order: POST request, submit a collection of menu item <i>id</i> values, keyed menuIds; when parsed, estimate time returns in key \"preparation_time\"</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Features</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Connect with API</li><li>Display list of items</li><li>Filter by category</li><li>Add order items</li><li>View existing ordered items</li><li>Submit order</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Technology Used</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>UITableView: list of category, then list of menu items</li><li>UITableViewCell: custom cell layout</li><li>URLSession: data task for retrieving the menu items</li><li>Codable: decoding and encoding JSON data&nbsp;</li><li>Segue: pass info from TVC listing menu items to VC that displays details of item</li><li>TabBar: switch to view existing ordered items</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Setting Up The StoryBoard</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Drag 2 NC into the storyboard, embed them into TBC. Check <code>Prefers Larger Titles</code> like this: (Note:&nbsp;to use regular title size in other VC, call&nbsp;<code>navigationItem.largeTitleDisplayMode = .never</code>​&nbsp;in <code>viewDidLoad</code>)"
+    },
+    {
+      "type": "text",
+      "data": "<img src=\"quiver-image-url/45CC073B8394CCCDCC8F2E9EFCB9C805.jpg\" alt=\"01.jpg\" width=\"1680\" height=\"1050\"><br>"
+    },
+    {
+      "type": "text",
+      "data": "Add an additional VC, and hook them all up. Create all the Controllers for the VC and TVC, and link up the segues from the Prototype cells."
+    },
+    {
+      "type": "text",
+      "data": "<img src=\"quiver-image-url/108D33837ED71CDC2F970FBDD9EA98E7.jpg\" alt=\"02.jpg\" width=\"1680\" height=\"1050\">"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Define Model Objects</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Define the <code>MenuItem</code> model object and create <code>Categories</code> and <code>PreparationTime</code> intermediary objects for converting from JSON. For <code>MenuItem</code> we will use the&nbsp;<code>JSONSerialization.jsonObject()</code> method so conformation to <code>Codable</code> is not required, for the other two we'll use a <code>JSONDecoder()</code>. Note the difference in how the objects are defined, and the networking code in the model controller."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct MenuItem {\n\tlet id: Int\n\tlet name: String\n\tlet category: String\n\tlet description: String\n\tlet imageURL: URL\n\tlet price: Double\n\t\n\tinit?(json: [String:Any]) {\n\t\tguard let id = json[\"id\"] as? Int,\n\t\t\tlet name = json[\"name\"] as? String,\n\t\t\tlet category = json[\"category\"] as? String,\n\t\t\tlet description = json[\"description\"] as? String,\n\t\t\tlet imageURLString = json[\"image_url\"] as? String,\n\t\t\tlet imageURL = URL(string: imageURLString),\n\t\t\tlet price = json[\"price\"] as? Double\n\t\t\telse {return nil}\n\t\t\n\t\tself.id = id\n\t\tself.name = name\n\t\tself.category = category\n\t\tself.description = description\n\t\tself.imageURL = imageURL\n\t\tself.price = price\n\t}\n}\n\nstruct Categories: Codable {\n\tlet categories: [String]\n}\n\nstruct PreparationTime: Codable {\n\tlet preparationTime: Int\n\t\n\tenum CodingKeys: String, CodingKey {\n\t\tcase preparationTime = \"preparation_time\"\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Prepare Model Controller &amp; Networking Code</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Put all networking code into a model controller, so multiple VCs can call it. Make a static property <code>shared</code> so all VC can call methods on the same instance of <code>MenuController</code>."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class MenuController {\n\tstatic let shared = MenuController()\n\t// So one instance of this controller can be shared across all VC\n\n\tlet baseURL: URL = URL(string: \"http://localhost:8090/\")!\n\t\n\tfunc fetchCategories(completion: @escaping([String]?) -> Void) {\n\t\tlet categoryURL = baseURL.appendingPathComponent(\"categories\")\n\t\t\n\t\tlet categoryDataTask = URLSession.shared.dataTask(with: categoryURL) { (data, response, error) in\n\t\t\tif let data = data {\n\t\t\t\tdo {\n\t\t\t\t\tlet jsonDecoder = JSONDecoder()\n\t\t\t\t\tlet categoriesData = try jsonDecoder.decode(Categories.self, from: data)\n\t\t\t\t\tcompletion(categoriesData.categories)\n\t\t\t\t} catch {\n\t\t\t\t\tprint(error.localizedDescription)\n\t\t\t\t\tcompletion(nil)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tcategoryDataTask.resume()\n\t}\n\t\n\tfunc fetchMenuItems(category: String, completion: @escaping([MenuItem]?) -> Void) {\n\t\tlet query: [String:String] = [\"category\":category]\n\t\tguard let menuURL = baseURL.appendingPathComponent(\"menu\").withQueries(query) else {completion(nil); return}\n\t\t\n\t\tlet menuDataTask = URLSession.shared.dataTask(with: menuURL) { (data, response, error) in\n\t\t\tguard let data = data else {completion(nil); return}\n\t\t\tdo {\n\t\t\t\tlet rawJSON = try JSONSerialization.jsonObject(with: data)\n\t\t\t\tif let json = rawJSON as? [String:Any],\n\t\t\t\t\tlet resultsArray = json[\"items\"] as? [[String:Any]] {\n\t\t\t\t\t\n\t\t\t\t\tlet menuItems = resultsArray.flatMap { MenuItem(json: $0) }\n\t\t\t\t\tcompletion(menuItems)\n\t\t\t\t}\n\t\t\t} catch {\n\t\t\t\tprint(error.localizedDescription)\n\t\t\t\tcompletion(nil)\n\t\t\t}\n\t\t}\n\t\tmenuDataTask.resume()\n\t}\n\t\n\tfunc sumbitOrder(menuIds: [Int], completion: @escaping(Int?) -> Void) {\n\t\tlet orderURL = baseURL.appendingPathComponent(\"order\")\n\t\tvar request = URLRequest(url: orderURL)\n\n\t\trequest.httpMethod = \"POST\"\n\t\trequest.setValue(\"application/json\", forHTTPHeaderField: \"Content-Type\")\n\t\t\n\t\tlet data: [String:[Int]] = [\"menuIds\": menuIds]\n\t\tlet jsonEncoder = JSONEncoder()\n\t\tlet jsonData = try? jsonEncoder.encode(data)\n\t\trequest.httpBody = jsonData\n\t\t\n\t\tlet orderDataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in\n\t\t\tif let data = data {\n\t\t\t\tlet jsonDecoder = JSONDecoder()\n\t\t\t\tlet prepTime = try? jsonDecoder.decode(PreparationTime.self, from: data)\n\t\t\t\tcompletion(prepTime?.preparationTime)\n\t\t\t}\n\t\t}\n\t\torderDataTask.resume()\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>AutoLayout</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Here comes one of the trickiest things in Xcode. What we want is something like this:"
+    },
+    {
+      "type": "text",
+      "data": "<img src=\"quiver-image-url/BA00AAB660358891A96872B10D22879E.jpg\" alt=\"IMG_5651.jpg\" width=\"462\" height=\"1000\">"
+    },
+    {
+      "type": "text",
+      "data": "Basic setup:<div><ul><li>1 Image view</li><li>2 Labels, for name and price, stacked</li><li>1 Text view, stacked with the label stack</li><li>1 Button</li></ul></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Image View</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Aspect fill</li><li>Equal width to safe area</li><li>3:2 aspect ratio</li><li>Align top, leading and trailing to safe area</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Label</h4>"
+    },
+    {
+      "type": "text",
+      "data": "Stack:<br><ul><li>Axis horizontal</li><li>Alignment center</li><li>Distribution fill</li><li>Spacing 20</li><li><font color=\"#323232\" style=\"background-color: rgb(254, 250, 0);\">Layout margin&nbsp;fixed, left = 5, right = 5<b><sup>#</sup></b></font></li><li>Leading space 0 to superview</li><li>Trailing space 0 to superview</li></ul>Name label:<div><ul><li>Alignment left</li><li><font color=\"#323232\" style=\"background-color: rgb(254, 250, 0);\">Lines 0<b><sup>#</sup></b><b><sup>#</sup></b></font></li><li>Line break word wrap</li><li>Content hugging priority vertical = 250, horizontal 250</li><li><font color=\"#323232\" style=\"background-color: rgb(254, 250, 0);\">Content compression resistance priority horizontal = 750, vertical = 1000<b><sup>#</sup></b><b><sup>#</sup></b><b><sup>#</sup></b></font></li><li>Intrinsic size placeholder, width = none, height = 30<br></li></ul>Price label:</div><div><ul><li>Alignment right</li><li>Content hugging priority hotizontal = 1000, vertical = 1000</li><li><font color=\"#323232\" style=\"background-color: rgb(254, 250, 0);\">Content compression resistance priority horizontal = 1000, vertical = 750<b><sup>#</sup></b><b><sup>#</sup></b><b><sup>#</sup></b><b><sup>#</sup></b></font></li></ul>#: Some how text view has 5 inset, use this to align<br></div><div>##: So the label takes up the number of lines required to show all contents. Set together with the intrinsic size or else it will f up the storyboard preview</div><div>###: Avoids clipping as it takes up more number of lines</div><div>####: Avoids clipping so full label always shown</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Text View</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Behavior uncheck all</li><li>Scroll view only show vertical</li><li>Leading space 0 to superview</li><li>Trailing space 0 to superview</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Combined Stack</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Top sapce 30 to image view</li><li>Bottom sapce 30 to buttons</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Button</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Background blue</li><li>Tint white</li><li>Equal width to safe area</li><li>8:1 aspect ratio</li><li>Leading space 0 to safe area</li><li>Trailing space 0 to&nbsp;safe area</li><li>Bottom space 0 to&nbsp;safe area</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Set Up&nbsp;CategoryTableViewController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "First, fetch category data. Always use a <code>updateUI</code> function to hide complexity. Also enable pull to refresh."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var categories = [String]()\n@IBOutlet weak var refresher: UIRefreshControl!\n\noverride func viewDidLoad() {\n    super.viewDidLoad()\n\tMenuController.shared.fetchCategories { (categoryData) in\n\t\tif let categoryData = categoryData {\n\t\t\tself.updateUI(with: categoryData)\n\t\t}\n\t}\n}\n\nfunc updateUI(with categoryData: [String]) {\n\tDispatchQueue.main.async {\n\t\tself.categories = categoryData\n\t\tself.tableView.reloadData()\n\t}\n}\n\n@IBAction func refreshTable(_ sender: Any) {\n\tMenuController.shared.fetchCategories { (categoryData) in\n\t\tif let categoryData = categoryData {\n\t\t\tself.updateUI(with: categoryData)\n\t\t\tDispatchQueue.main.async {\n\t\t\t\tself.refresher.endRefreshing()\n\t\t\t}\n\t\t}\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "Second, all the usual TVC setup."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func numberOfSections(in tableView: UITableView) -> Int {\n    return 1\n}\n\noverride func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {\n    return categories.count\n}\n\noverride func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {\n    let cell = tableView.dequeueReusableCell(withIdentifier: \"CategoryCell\", for: indexPath)\n    cell.textLabel?.text = categories[indexPath.row].capitalized\n    return cell\n}"
+    },
+    {
+      "type": "text",
+      "data": "Finally, set up segue. Link prototype cell to <code>MenuTableViewController</code>, then use <code>indexPathForSelectedRow</code> to select object for segue:&nbsp;"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func prepare(for segue: UIStoryboardSegue, sender: Any?) {\n\tif segue.identifier == \"MenuSegue\" {\n\t\tlet menuTableViewController = segue.destination as? MenuTableViewController\n\t\tguard let indexRow = tableView.indexPathForSelectedRow?.row else {return}\n\t\tmenuTableViewController?.selectedCategory = categories[indexRow]\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Set Up&nbsp;MenuTableViewController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "First, fetch data and update UI. Also enable pull to refresh."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var selectedCategory = String()\nvar menuItems:[MenuItem] = []\n@IBOutlet weak var refresher: UIRefreshControl!\n\noverride func viewDidLoad() {\n    super.viewDidLoad()\n\tnavigationItem.title = selectedCategory.capitalized\n\tnavigationItem.largeTitleDisplayMode = .never\n\t// Use above line to force regular title size\n\tMenuController.shared.fetchMenuItems(category: selectedCategory) { (menuData) in\n\t\tif let menuData = menuData {\n\t\t\tself.updateUI(with: menuData)\n\t\t}\n\t}\n}\n\nfunc updateUI(with menuData: [MenuItem]) {\n\tDispatchQueue.main.async {\n\t\tself.menuItems = menuData\n\t\tself.tableView.reloadData()\n\t}\n}\n\n@IBAction func refreshTable(_ sender: Any) {\n\tMenuController.shared.fetchMenuItems(category: selectedCategory) { (menuData) in\n\t\tif let menuData = menuData {\n\t\t\tself.updateUI(with: menuData)\n\t\t\tDispatchQueue.main.async {\n\t\t\t\tself.refresher.endRefreshing()\n\t\t\t}\n\t\t}\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "Second, all the usual TVC setup."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func numberOfSections(in tableView: UITableView) -> Int {\n    return 1\n}\n\noverride func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {\n    return menuItems.count\n}\n\noverride func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {\n    let cell = tableView.dequeueReusableCell(withIdentifier: \"MenuItemCell\", for: indexPath)\n\tlet menuItem = menuItems[indexPath.row]\n\t\n    cell.textLabel?.text = menuItem.name\n\tcell.detailTextLabel?.text = String(format: \"$%.2f\", menuItem.price)\n\t// format: \"$\", followed by a floating point number, then \".\", then 2 decimal places\n\n    return cell\n}"
+    },
+    {
+      "type": "text",
+      "data": "Finally, set up segue. Link prototype cell to&nbsp;<code style=\"font-size: 16.200000762939453px;\">MenuItemDetailTableViewController</code>, and use&nbsp;<code style=\"font-size: 16.200000762939453px;\">indexPathForSelectedRow</code>&nbsp;to select object:&nbsp;"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func prepare(for segue: UIStoryboardSegue, sender: Any?) {\n\tif segue.identifier == \"MenuDetailSegue\" {\n\t\tlet menuItemDetailViewController = segue.destination as? MenuItemDetailViewController\n\t\tguard let indexRow = tableView.indexPathForSelectedRow?.row else {return}\n\t\tmenuItemDetailViewController?.selectedMenuItem = menuItems[indexRow]\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Set Up&nbsp;MenuItemDetailViewController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Once again, usual setup, except for the delegate part."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var selectedMenuItem: MenuItem!\nvar delegate: AddToOrderDelegate?\n\n@IBOutlet weak var itemImage: UIImageView!\n@IBOutlet weak var itemNameLabel: UILabel!\n@IBOutlet weak var itemPriceLabel: UILabel!\n@IBOutlet weak var itemDescription: UITextView!\n@IBOutlet weak var orderButton: UIButton!\n\noverride func viewDidLoad() {\n    super.viewDidLoad()\n\tnavigationItem.largeTitleDisplayMode = .never\n\tupdateUI()\n\tsetupDelegate()\n}\n\nfunc updateUI() {\n\tnavigationItem.title = selectedMenuItem.name.capitalized\n\titemNameLabel.text = selectedMenuItem.name.capitalized\n\titemPriceLabel.text = String(format: \"$%.2f\", selectedMenuItem.price)\n\titemDescription.text = \"\\(selectedMenuItem.description)\"\n}\n\nfunc setupDelegate() {\n\tguard let navController = tabBarController?.viewControllers?.last as? UINavigationController,\n\t\tlet orderTableViewController = navController.viewControllers.first as? OrderTableViewController\n\t\t// Last Tab Bar item, first in stack\n\t\telse {return}\n\tdelegate = orderTableViewController\n}\n\n@IBAction func orderButtonUpInside(_ sender: Any) {\n\tdelegate?.added(menuItem: selectedMenuItem)\n\tUIView.animate(withDuration: 0.1, animations: {\n\t\tself.orderButton.transform = CGAffineTransform.identity\n\t})\n}"
+    },
+    {
+      "type": "text",
+      "data": "The delegate protocol is defined as:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "protocol AddToOrderDelegate {\n\tfunc added(menuItem: MenuItem)\n}"
+    },
+    {
+      "type": "text",
+      "data": "Why use this design? Because&nbsp;<code>MenuItemDetailViewController</code> has to pass&nbsp;<code>selectedMenuItem</code> to&nbsp;<code>OrderTableViewController</code> without the use of segue. So&nbsp;<code>OrderTableViewController</code>&nbsp;conforms to AddToOrderDelegate, and implements the method."
+    },
+    {
+      "type": "text",
+      "data": "Some extra button animation:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "@IBAction func orderButtonDown(_ sender: Any) {\n\tlet impact = UIImpactFeedbackGenerator(style: .heavy)\n\timpact.impactOccurred()\n\tUIView.animate(withDuration: 0.1) {\n\t\tlet scaleTransform = CGAffineTransform(scaleX: 1.1, y: 1.1)\n\t\tself.orderButton.transform = scaleTransform\n\t}\n}\n\n@IBAction func orderButtonUpOutside(_ sender: Any) {\n\tUIView.animate(withDuration: 0.1) {\n\t\tself.orderButton.transform = CGAffineTransform.identity\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "Text View Additional Setup, call this in VC to make the scroll view within the text view start from the top rather than some random position, and&nbsp;show the scroll indicator for a moment so user will know to scroll."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func viewDidLayoutSubviews() {\n\tsuper.viewDidLayoutSubviews()\n\torderButton.layer.cornerRadius = 3\n// additional set up for text view\n// Scroll to top\n\titemDescription.setContentOffset(CGPoint.zero, animated: false)\n// Flash scroll indicator if long enough for scroll\n\titemDescription.layoutIfNeeded()\n\t// This line is needed because the autolayout constraints may not be in effect yet\n\tlet contentHeight = itemDescription.contentSize.height\n\tlet viewHeight = itemDescription.frame.height\n\tif contentHeight > viewHeight {\n\t\titemDescription.flashScrollIndicators()\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Set Up&nbsp;OrderTableViewController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "First, implement the required function by the <code>AddToOrderDelegate</code>&nbsp;protocol."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func added(menuItem: MenuItem) {\n\torderedItems.append(menuItem)\n\tlet indexPath = IndexPath(row: orderedItems.count - 1, section: 0)\n\ttableView.insertRows(at: [indexPath], with: .automatic)\n\tupdateBadgeNumber()\n}"
+    },
+    {
+      "type": "text",
+      "data": "Write code for submitting order. An alert controller is used to present the confirmation box. Call <code>performSegue</code> here, further preparation found below."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "@IBAction func submitOrder(_ sender: Any) {\n\tguard orderedItems.count >= 1 else {return}\n\tlet totalItemPrice = orderedItems.reduce(0.0) { (result, menuItem) -> Double in\n\t\treturn result + menuItem.price\n\t}\n\tlet formattedPrice = String(format: \"$%.2f\", totalItemPrice)\n\tlet alertController = UIAlertController(title: \"Confirm Order?\", message: \"Total: \\(formattedPrice)\", preferredStyle: .alert)\n\tlet cancelAction = UIAlertAction(title: \"Cancel\", style: .cancel)\n\tlet confirmAction = UIAlertAction(title: \"Yes!\", style: .default) { (action) in\n\t\tself.postOrder(self.orderedItems)\n\t}\n\talertController.addAction(cancelAction)\n\talertController.addAction(confirmAction)\n\tpresent(alertController, animated: true)\n}\n\nfunc postOrder(_ orderedItems: [MenuItem]) {\n\tlet listOfID = orderedItems.map { $0.id }\n\tMenuController.shared.sumbitOrder(menuIds: listOfID) { (requiredTime) in\n\t\tDispatchQueue.main.async {\n\t\t\tif let requiredTime = requiredTime {\n\t\t\t\tself.requiredTime = requiredTime\n\t\t\t\tself.performSegue(withIdentifier: \"ConfirmSegue\", sender: nil)\n\t\t\t}\n\t\t}\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "Implement <code>updateBadgeNumber()</code> and animation for badge."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func updateBadgeNumber() {\n\tlet badgeValue = orderedItems.count > 0 ? \"\\(orderedItems.count)\" : nil\n\tnavigationController?.tabBarItem.badgeValue = badgeValue\n\tanimateTabBarBadgeAt(tabNumber: 2)\n}\n\nfunc animateTabBarBadgeAt(tabNumber: Int) {\n\t\n\t// tabNumber starts with 1\n\tguard let view = self.tabBarController?.tabBar.subviews[tabNumber] else {return}\n\t\n\tfor subview in (view.subviews) {\n\t\tlet viewType = String(describing: type(of: subview))\n\t\tif viewType == \"_UIBadgeView\" {\n\t\t\tanimateView(view: subview)\n\t\t}\n\t}\n}\n\nfunc animateView(view:UIView){\n\t\n\t// Must call layoutIfNeeded first to have it init at the right position\n\tview.layer.layoutIfNeeded()\n\t\n\t// Scale and translate\n\tlet scaleTransform = CGAffineTransform(scaleX: 1.2, y: 1.2)\n\tlet translateTransform = CGAffineTransform(translationX: view.layer.frame.width * 0.1, y: view.layer.frame.height * 0.1)\n\tview.layer.transform = CATransform3DMakeAffineTransform(translateTransform)\n\tUIView.animate(withDuration: 0.3, animations: {\n\t\tview.layer.transform = CATransform3DMakeAffineTransform(scaleTransform)\n\t})\n\t\n//\t// Horizontal shake\n//\tlet shakeAnimation = CABasicAnimation(keyPath: \"position\")\n//\tshakeAnimation.duration = 0.04\n//\tshakeAnimation.repeatCount = 4\n//\tshakeAnimation.autoreverses = true\n//\tshakeAnimation.fromValue = NSValue(cgPoint: CGPoint(x:view.center.x - 1, y:view.center.y))\n//\tshakeAnimation.toValue = NSValue(cgPoint: CGPoint(x:view.center.x + 1, y:view.center.y))\n//\tview.layer.add(shakeAnimation, forKey: \"position\")\n}"
+    },
+    {
+      "type": "text",
+      "data": "Logic for updateSubmitButtonState(), so the submit button is only enabled when there is ordered items."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func updateSubmitButtonState() {\n\tif orderedItems.count < 1 {\n\t\tsubmitButton.isEnabled = false\n\t} else {\n\t\tsubmitButton.isEnabled = true\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "Then, set up property, viewDidLoad and table view."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// Do not declare as [MenuItem]?, because it won't be received via a segue, and it should be init anyway even if the collection is empty\nvar orderedItems = [MenuItem]()\nvar requiredTime = Int()\n\n@IBOutlet weak var submitButton: UIBarButtonItem!\n\noverride func viewDidLoad() {\n    super.viewDidLoad()\n\tnavigationItem.leftBarButtonItem = editButtonItem\n\tupdateSubmitButtonState()\n}\n\noverride func numberOfSections(in tableView: UITableView) -> Int {\n    return 1\n}\n\noverride func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {\n    return orderedItems.count\n}\n\noverride func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {\n    let cell = tableView.dequeueReusableCell(withIdentifier: \"OrderedItemCell\", for: indexPath)\n\tlet orderedItem = orderedItems[indexPath.row]\n\t\n\tcell.textLabel?.text = orderedItem.name\n\tcell.detailTextLabel?.text = String(format: \"$%.2f\", orderedItem.price)\n\n    return cell\n}\n\n// Override to support conditional editing of the table view.\noverride func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {\n    // Return false if you do not want the specified item to be editable.\n    return true\n}\n\n// Override to support editing the table view.\noverride func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {\n    if editingStyle == .delete {\n        orderedItems.remove(at: indexPath.row)\n        tableView.deleteRows(at: [indexPath], with: .fade)\n        updateSubmitButtonState()\n\t\tupdateBadgeNumber()\n    }\n}"
+    },
+    {
+      "type": "text",
+      "data": "Finally, set up the programmatic segue to&nbsp;<code>OrderConfirmationViewController</code>. Go to storyboard, and control-drag from <code>OrderTableViewController</code> to&nbsp;<code>OrderConfirmationViewController</code>. Programmatic segue is used for segue that are not always performed due to control flow."
+    },
+    {
+      "type": "text",
+      "data": "<img src=\"quiver-image-url/BE82D86EC29B6F38082CA1111525C1E0.jpg\" alt=\"Screen Shot 2018-01-21 at 12.46.40 AM.jpg\" width=\"1680\" height=\"1050\">"
+    },
+    {
+      "type": "text",
+      "data": "Use&nbsp;<code>prepare(segue:sender:)</code> to pass <code>requiredTime</code> to&nbsp;<code>OrderConfirmationViewController</code>. We will set up a button in&nbsp;<code>OrderConfirmationViewController</code> and connect it to <code>Exit</code> to unwind by calling&nbsp;<code>unwindToOrderList</code> and reset <code>OrderedItems</code>."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func prepare(for segue: UIStoryboardSegue, sender: Any?) {\n\tguard segue.identifier == \"ConfirmSegue\" else {return}\n\tlet orderConfirmationViewController = segue.destination as? OrderConfirmationViewController\n\torderConfirmationViewController?.requiredTime = requiredTime\n}\n\n@IBAction func unwindToOrderList(segue: UIStoryboardSegue) {\n\tif segue.identifier == \"DismissConfirmation\" {\n\t\torderedItems.removeAll()\n\t\ttableView.reloadData()\n\t\tupdateBadgeNumber()\n\t\tupdateSubmitButtonState()\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Set Up&nbsp;OrderConfirmationViewController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Connect the <code>Dismiss</code> button with <code>Exit</code> and write:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "@IBOutlet weak var timeLabel: UILabel!\n\nvar requiredTime: Int!\n\noverride func viewDidLoad() {\n    super.viewDidLoad()\n\tif let requiredTime = requiredTime {\n\t\ttimeLabel.text = \"Time Remaining: \\(requiredTime)mins\"\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Fetch Images</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Only deal with images and other details after making sure the overall flow of the app is correct. First, enable cache. In&nbsp;<code>didFinishLaunchingWithOptions</code>:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let temporaryDirectory = NSTemporaryDirectory()\nlet urlCache = URLCache(memoryCapacity: 25000000, diskCapacity: 50000000, diskPath: temporaryDirectory)\nURLCache.shared = urlCache"
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": "<br>"
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}

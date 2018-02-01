@@ -1,0 +1,57 @@
+{
+  "title": "Ch 034P Practice: NASA APOD API",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>APODRecord</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct APODRecord: Codable {\n\tlet date: String\n\tlet title: String\n\tlet url: URL\n\tlet description: String?\n\tlet copyright: String?\n\t\n\tenum CodingKeys: String, CodingKey {\n\t\tcase date\n\t\tcase title\n\t\tcase url\n\t\tcase description = \"explanation\"\n\t\tcase copyright\n\t}\n\t\n\tinit(from decoder: Decoder) throws {\n\t\tlet valueContainer = try decoder.container(keyedBy: CodingKeys.self)\n\t\tself.date = try valueContainer.decode(String.self, forKey: .date)\n\t\tself.title = try valueContainer.decode(String.self, forKey: .title)\n\t\tself.url = try valueContainer.decode(URL.self, forKey: .url)\n\t\tself.description = try valueContainer.decode(String.self, forKey: .description)\n\t\tself.copyright = try valueContainer.decode(String.self, forKey: .copyright)\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>APODRecordController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Use&nbsp;<code>withQueries</code> URL extension in&nbsp;<a href=\"quiver-note-url/6BE721D3-7C87-4641-B95F-68D7CEB53AE4\">Extension: URL</a>."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct APODRecordController {\n\tfunc fetchAPODRecord(APODQuery: [String:String], completion: @escaping(APODRecord?) -> Void) {\n\t\tlet baseURL: URL = URL(string: \"https://api.nasa.gov/planetary/apod\")!\n\t\tguard let queryURL = baseURL.withQueries(APODQuery) else {\n\t\t\tcompletion(nil)\n\t\t\tprint(\"Invalid query!\")\n\t\t\treturn\n\t\t}\n\t\t\n\t\tlet apodDataTask = URLSession.shared.dataTask(with: queryURL) { (data, response, error) in\n\t\t\tif let data = data {\n\t\t\t\tdo {\n\t\t\t\t\tlet decoder = JSONDecoder()\n\t\t\t\t\tlet apodResultObject = try decoder.decode(APODRecord.self, from: data)\n\t\t\t\t\tprint(apodResultObject)\n\t\t\t\t\tcompletion(apodResultObject)\n\t\t\t\t} catch {\n\t\t\t\t\tprint(error.localizedDescription)\n\t\t\t\t\tcompletion(nil)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tapodDataTask.resume()\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>APODImageController</h2>"
+    },
+    {
+      "type": "text",
+      "data": "This is used to fetch the image using the image url."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct APODImageController {\n\tfunc fetchAPODImage(url: URL?, completion: @escaping(UIImage?) -> Void) {\n\t\tguard let url = url else {\n\t\t\tcompletion(nil)\n\t\t\treturn\n\t\t}\n\t\tprint(url)\n\t\tlet apodImageDataTask = URLSession.shared.dataTask(with: url) { (data, response, error) in\n\t\t\tif let data = data {\n\t\t\t\tguard let apodImage = UIImage(data: data) else {\n\t\t\t\t\tcompletion(nil)\n\t\t\t\t\tprint(\"Error: fail to init image.\")\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t\tcompletion(apodImage)\n\t\t\t}\n\t\t}\n\t\tapodImageDataTask.resume()\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>VC</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Two things to note:<div><ol><li>Network indicator is displayed</li><li>Aspect ratio of UIImageView adjusted according to image size</li></ol></div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class ViewController: UIViewController {\n\n\t@IBOutlet weak var apodImage: UIImageView!\n\t@IBOutlet weak var apodDescription: UILabel!\n\t@IBOutlet weak var apodCopyright: UILabel!\n\t@IBOutlet weak var apodImageAspectConstraint: NSLayoutConstraint!\n\tlet apodRecordController = APODRecordController()\n\tlet apodImageController = APODImageController()\n\t\n\toverride func viewDidLoad() {\n\t\tsuper.viewDidLoad()\n\t\t\n\t\tapodDescription.text = \"\"\n\t\tapodCopyright.text = \"\"\n\t\t\n\t\tlet initialQuery: [String:String] = [\n\t\t\t\"api_key\":\"DEMO_KEY\",\n\t\t\t\"hd\":\"True\"\n\t\t]\n\t\t\n\t\tUIApplication.shared.isNetworkActivityIndicatorVisible = true\n\t\t\n\t\tapodRecordController.fetchAPODRecord(APODQuery: initialQuery) { (apodRecord) in\n\t\t\tguard let apodRecord = apodRecord else {return}\n\t\t\tDispatchQueue.main.async {\n\t\t\t\tself.navigationItem.title = apodRecord.title\n\t\t\t\tself.apodDescription.text = apodRecord.description ?? \"\"\n\t\t\t\tif let copyright = apodRecord.copyright {\n\t\t\t\t\tself.apodCopyright.text = \"Copyright \\(copyright)\"\n\t\t\t\t} else {\n\t\t\t\t\tself.apodCopyright.isHidden = true\n\t\t\t\t}\n\t\t\t\tself.apodImageController.fetchAPODImage(url: apodRecord.url, completion: { (image) in\n\t\t\t\t\tDispatchQueue.main.async {\n\t\t\t\t\t\tif let image = image {\n\t\t\t\t\t\t\tlet aspectRatio: CGFloat = image.size.width / image.size.height\n\t\t\t\t\t\t\tself.apodImageAspectConstraint.setMultiplier(multiplier: aspectRatio)\n\t\t\t\t\t\t\tself.view.layoutIfNeeded()\n\t\t\t\t\t\t\tself.apodImage.image = image\n\t\t\t\t\t\t}\n\t\t\t\t\t\tUIApplication.shared.isNetworkActivityIndicatorVisible = false\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t}\n\t\t}\n\t}\n\n\toverride func didReceiveMemoryWarning() {\n\t\tsuper.didReceiveMemoryWarning()\n\t\t// Dispose of any resources that can be recreated.\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}

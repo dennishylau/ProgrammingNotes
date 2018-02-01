@@ -1,0 +1,66 @@
+{
+  "title": "Ch 030 Closure",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Basics</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Closures are basically nameless functions\u001b."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// A function\nfunc sum(_ numbers: [Int]) -> Int {\n\tvar total: Int = 0\n\tfor i in numbers {\n\t\ttotal += i\n\t}\n\treturn total\n}\nsum([1,2,3])\n\n// A closure\u001b\nlet sumClosure = { (numbers: [Int]) -> Int in\n\tvar total: Int = 0\n\tfor i in numbers {\n\t\ttotal += i\n\t}\n\treturn total\n}\nsumClosure([1,2,3])"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Parameters &amp; \u001bReturn Value</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let closure1 = { () -> Void in\n\t// No parameters and no return value\n}\n\nlet closure2 = { (someString: String) -> Void in\n\t// Has parameter(s) but no return value\n\tprint(someString)\n}\n\nlet closure3 = { () -> Int in\n\t// No parameters but has return value\n\treturn Int(arc4random_uniform(6) + 1)\n}\n\nlet closure4 = { (someInt: Int) -> String in\n\t// Has both\n\treturn \"\\(someInt)\"\n}\n"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Type Inference</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct Music: Equatable, Comparable {\n\tlet name: String\n\tlet album: String\n\tlet trackNumber: Int\n\tlet length: Int\n\t\n\tstatic func == (lhs: Music, rhs: Music) -> Bool {\n\t\treturn lhs.name == rhs.name && lhs.album == rhs.album\n\t}\n\t\n\tstatic func < (lhs: Music, rhs: Music) -> Bool {\n\t\treturn lhs.trackNumber < rhs.trackNumber\n\t}\n}\n\nlet track1 = Music(name: \"六月飛霜\", album: \"Stranger Under My Skin\", trackNumber: 1, length: 262)\nlet track2 = Music(name: \"Stranger Under My Skin\", album: \"Stranger Under My Skin\", trackNumber: 2, length: 256)\nlet allTracks: Array<Music> = [track2,track1]\n\n// Type inference of the closure arguments is automatically done when calling sorted on allTracks\nallTracks.sorted { (firstTrack, secondTrack) -> Bool in\n\treturn firstTrack.trackNumber < secondTrack.trackNumber\n}\n"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Syntactic Sugar</h2>"
+    },
+    {
+      "type": "text",
+      "data": "A name for closure code that is really concise, using type inference."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// Normal call\nallTracks.sorted { (firstTrack: Music, secondTrack: Music) -> Bool in\n\treturn firstTrack.trackNumber < secondTrack.trackNumber\n}\n\n// Compiler knows allTracks is [Music], so arguements for sorted must be Music\n// Skip argument names and use placeholder names\nallTracks.sorted { (firstTrack, secondTrack) -> Bool in\n\treturn firstTrack.trackNumber < secondTrack.trackNumber\n}\n\n// Compiler infers return type, so skip the -> Bool\nallTracks.sorted { (firstTrack, secondTrack) in\n\treturn firstTrack.trackNumber < secondTrack.trackNumber\n}\n\n// $0 means the first argument of the closure, i.e. firstTrack\n\nallTracks.sorted {\n\treturn $0.trackNumber < $1.trackNumber\n}\n\n// When the closure only has one line, compiler knows to auto return result\nallTracks.sorted { $0.trackNumber < $1.trackNumber }\n"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Trailing Closure Syntax</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// Say a func, with closure as the last argument\nfunc performRequest(url: String, response: (_ value: Int) -> Int) {\n\tprint(url)\n\tprint(response(2))\n}\n\n// The original\nperformRequest(url: \"lol\", response: { (value: Int) -> Int in\n\treturn value * 10\n})\n\n// The ) ends after the secong last argument\n// Closure argument name removed\n// Set value: 2, then run closure code response(...)\nperformRequest(url: \"lol\") { (value: Int) -> Int in\n\treturn value * 10\n}\n\n// Short hand\nperformRequest(url: \"lol\") { $0 * 10 }\n\n// Another example, see the parameter name is code in here\nfunc performAction(url: String, response: (_ code: Int) -> Void) {\n\tprint(url)\n\tprint(\"response\")\n\tresponse(4)\n}\n\n// Using the trailing closure syntax, we can declare another name e.g. called number that refers to the value of code:, NOT response(code:)\nperformAction(url: \"Hello World\") { (number) in\n\tprint(\"Hi!\")\n\tprint(number * 4)\n}\n"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Scope</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Closure is smart.</div><div>It has access to variables both inside its scope and those in the same scope.</div><div>Using the self keyword before variables, closure also auto manages memory safely.</div>"
+    }
+  ]
+}

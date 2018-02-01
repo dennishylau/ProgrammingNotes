@@ -1,0 +1,54 @@
+{
+  "title": "Ch 035.2 Alternative To JSON Decoding",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Alternative To Codable &amp; Intermediary Objects For Decoding</h2>"
+    },
+    {
+      "type": "text",
+      "data": "For more complex JSON, the information of interest may not rest at the top layer."
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "data": "{\n  \"items\" : [\n    {\n      \"description\" : \"Seasoned meatballs on top of freshly-made spaghetti. Served with a robust tomato sauce.\",\n      \"name\" : \"Spaghetti and Meatballs\",\n      \"image_url\" : \"http:\\/\\/localhost:8090\\/images\\/\",\n      \"id\" : 1,\n      \"price\" : 9,\n      \"category\" : \"entrees\"\n    },\n    {\n      \"description\" : \"Tomato sauce, fresh mozzarella, basil, and extra-virgin olive oil.\",\n      \"name\" : \"Margherita Pizza\",\n      \"image_url\" : \"http:\\/\\/localhost:8090\\/images\\/\",\n      \"id\" : 2,\n      \"price\" : 10,\n      \"category\" : \"entrees\"\n    },\n    {\n      \"description\" : \"Pacific steelhead trout* with lettuce, tomato, and red onion.\",\n      \"name\" : \"Grilled Steelhead Trout Sandwich\",\n      \"image_url\" : \"http:\\/\\/localhost:8090\\/images\\/\",\n      \"id\" : 3,\n      \"price\" : 9,\n      \"category\" : \"entrees\"\n    },\n    {\n      \"description\" : \"Stewed sliced beef with yellow onions and garlic in a vinegar-soy sauce. Served with steamed jasmine rice and sautéed vegetables.\",\n      \"name\" : \"Pesto Linguini\",\n      \"image_url\" : \"http:\\/\\/localhost:8090\\/images\\/\",\n      \"id\" : 4,\n      \"price\" : 9,\n      \"category\" : \"entrees\"\n    }\n  ]\n}"
+    },
+    {
+      "type": "text",
+      "data": "What the object of interest is the&nbsp;array within the dictionary item keyed&nbsp;<code style=\"font-size: 16.200000762939453px;\">items</code>, i.e. the information that will be initialized into&nbsp;<code style=\"font-size: 16.200000762939453px;\">[MenuItem]</code>."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct MenuItem {\n\tlet id: Int\n\tlet name: String\n\tlet category: String\n\tlet description: String\n\tlet imageURL: URL\n\tlet price: Double\n\t\n\tinit?(json: [String:Any]) {\n\t\tguard let id = json[\"id\"] as? Int,\n\t\t\tlet name = json[\"name\"] as? String,\n\t\t\tlet category = json[\"category\"] as? String,\n\t\t\tlet description = json[\"description\"] as? String,\n\t\t\tlet imageURLString = json[\"image_url\"] as? String,\n\t\t\tlet imageURL = URL(string: imageURLString),\n\t\t\tlet price = json[\"price\"] as? Double\n\t\t\telse {return nil}\n\t\t\n\t\tself.id = id\n\t\tself.name = name\n\t\tself.category = category\n\t\tself.description = description\n\t\tself.imageURL = imageURL\n\t\tself.price = price\n\t}\n}"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func fetchMenuItems(category: String, completion: @escaping([MenuItem]?) -> Void) {\n\tlet query: [String:String] = [\"category\":category]\n\tguard let menuURL = baseURL.appendingPathComponent(\"menu\").withQueries(query) else {completion(nil); return}\n\t\n\tlet menuDataTask = URLSession.shared.dataTask(with: menuURL) { (data, response, error) in\n\t\tguard let data = data else {completion(nil); return}\n\t\tdo {\n\t\t\tlet rawJSON = try JSONSerialization.jsonObject(with: data)\n\t\t\tif let json = rawJSON as? [String:Any],\n\t\t\t\tlet resultsArray = json[\"items\"] as? [[String:Any]] {\n\t\t\t\t\n\t\t\t\tlet menuItems = resultsArray.flatMap { MenuItem(json: $0) }\n\t\t\t\tcompletion(menuItems)\n\t\t\t}\n\t\t} catch {\n\t\t\tprint(error.localizedDescription)\n\t\t\tcompletion(nil)\n\t\t}\n\t}\n\tmenuDataTask.resume()\n}"
+    },
+    {
+      "type": "text",
+      "data": "What's happening here?<div><code style=\"font-size: 16.200000762939453px;\">JSONSerialization</code>&nbsp;converts between JSON and the equivalent Foundation objects. The resulting&nbsp;<code style=\"font-size: 16.200000762939453px;\">rawJSON</code>&nbsp;will be of&nbsp;<code style=\"font-size: 16.200000762939453px;\">Any</code>&nbsp;type, so it has to be casted into&nbsp;<code style=\"font-size: 16.200000762939453px;\">[String:Any]</code>. The, the&nbsp;<code style=\"font-size: 16.200000762939453px;\">resultsArray</code>&nbsp;is the value of&nbsp;<code style=\"font-size: 16.200000762939453px;\">json[\"items\"]</code>&nbsp;and casted as an array of dictionary, which is basically the following.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "[\n    [\n      \"description\" : \"Seasoned meatballs on top of freshly-made spaghetti. Served with a robust tomato sauce.\",\n      \"name\" : \"Spaghetti and Meatballs\",\n      \"image_url\" : \"http:\\/\\/localhost:8090\\/images\\/\",\n      \"id\" : 1,\n      \"price\" : 9,\n      \"category\" : \"entrees\"\n    ],\n    [\n      \"description\" : \"Tomato sauce, fresh mozzarella, basil, and extra-virgin olive oil.\",\n      \"name\" : \"Margherita Pizza\",\n      \"image_url\" : \"http:\\/\\/localhost:8090\\/images\\/\",\n      \"id\" : 2,\n      \"price\" : 10,\n      \"category\" : \"entrees\"\n    ],\n    [\n      \"description\" : \"Pacific steelhead trout* with lettuce, tomato, and red onion.\",\n      \"name\" : \"Grilled Steelhead Trout Sandwich\",\n      \"image_url\" : \"http:\\/\\/localhost:8090\\/images\\/\",\n      \"id\" : 3,\n      \"price\" : 9,\n      \"category\" : \"entrees\"\n    ],\n    [\n      \"description\" : \"Stewed sliced beef with yellow onions and garlic in a vinegar-soy sauce. Served with steamed jasmine rice and sautéed vegetables.\",\n      \"name\" : \"Pesto Linguini\",\n      \"image_url\" : \"http:\\/\\/localhost:8090\\/images\\/\",\n      \"id\" : 4,\n      \"price\" : 9,\n      \"category\" : \"entrees\"\n    ]\n]"
+    },
+    {
+      "type": "text",
+      "data": "Finally, using&nbsp;<code style=\"font-size: 16.200000762939453px;\">flatMap</code>, each dictionary within the array is initialized into&nbsp;<code style=\"font-size: 16.200000762939453px;\">MenuItem</code>&nbsp;instances."
+    },
+    {
+      "type": "text",
+      "data": "The interesting thing about this method is that a) the model object does not have to be&nbsp;<code style=\"font-size: 16.200000762939453px;\">Codable</code>, b) no intermdiary object needed for complex JSON, and c) if there are multiple possible names for a particular JSON key, the initializer can handle it rather than needing additional CodingKeys, as shown in the method used in&nbsp;<a href=\"quiver-note-url/0A7D42E9-BA6B-4EAB-9EBA-C17AAE083467\">Ch 035P Practice: Decoding iTunes Search</a>. Say e.g. there are multiple possible imageURLs with differently sized images, or multiple descriptions:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let imageURLString = json[\"image_url_1000\"] as? String ?? json[\"image_url_500\"] as? String\n//...\nself.description = json[\"description\"] as? String ?? json[\"longDescription\"] as? String ?? \"\""
+    }
+  ]
+}

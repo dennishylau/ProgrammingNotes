@@ -1,11 +1,17 @@
 {
   "created_at" : 1515405952,
   "tags" : [
+    "App Development With Swift",
+    "Closure",
     "Codable",
+    "CodingKey",
+    "HTTP",
     "JSON",
-    "Swift"
+    "Protocol",
+    "Swift",
+    "URLSession"
   ],
-  "title" : "Ch 035 Decode JSON",
-  "updated_at" : 1515482519,
+  "title" : "Ch 035.1 HTTP GET & Decode JSON",
+  "updated_at" : 1516009336,
   "uuid" : "354D7952-562F-419F-B037-010DAB199E60"
 }

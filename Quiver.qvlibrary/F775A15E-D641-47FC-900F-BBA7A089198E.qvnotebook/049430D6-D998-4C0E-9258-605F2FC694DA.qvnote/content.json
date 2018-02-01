@@ -1,0 +1,77 @@
+{
+  "title": "Ch 026 Persistence & Saving Data",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>NSCoding &amp; NSObject</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div><div>Persistence: persisting the state of class instance variables</div><div>Archiving: provide a means to convert objects and values into an architecture-independent stream of bytes that preserves the identity of and the relationships between the objects and values</div></div><div>NSCoding: Protocol for plist dictionary encoding</div><div>NSObject: the mother of all classes in Objc, so only class supported not struct</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Syntax: Convenience, Required &amp; Final</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<div>convenience: needed when an initializer calls another initializer. In this case, the initializer called by the decoder calls the class initializer.</div><div>required: mark func as required for all subclasses. In other words, all subclasses must implement the same method. Classes with NSCoder and all its subclasses need this for the decoder</div><div>final: used the <code>class</code> keyword, the declared class cannot be subclassed.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Model Object</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class Note: NSObject,NSCoding {\n\tlet title: String\n\tlet text: String\n\tlet timestamp: Date\n\t\n\tstatic let documentsDirectory = FileManager.default.urls(for: .documentDirectory,in: .userDomainMask).first!\n\t// first means the first in the search result array\n\t// documentDirectory: eqv to /Document\n\t// userDomainMask: specifies ~\n\t// So url is ~/Document\n\tstatic let archiveURL = documentsDirectory.appendingPathComponent(\"notes\")\n\t\n\tstatic func saveToDisk(notes:[Note]) {\n\t\tNSKeyedArchiver.archiveRootObject(notes, toFile: archiveURL.path)\n\t}\n\t\n\tstatic func loadFromDisk() -> [Note]? {\n\t\tguard let unarchivedNotes = NSKeyedUnarchiver.unarchiveObject(withFile: archiveURL.path) as? [Note]\n\t\t\telse {return nil}\n\t\treturn unarchivedNotes\n\t}\n\t\n\toverride var description: String {\n\t\treturn \"Note(title: \\(title),text: \\(text),timestamp: \\(timestamp))\"\n\t}\n\t\n\tinit(title: String,text: String,timestamp: Date) {\n\t\tself.title = title\n\t\tself.text = text\n\t\tself.timestamp = timestamp\n\t}\n\t\n\t// NSCoding\n\t\n\tstruct PropertyKeys {\n\t\tstatic let title = \"title\"\n\t\tstatic let text = \"text\"\n\t\tstatic let timestamp = \"timestamp\"\n\t}\n\t\n\tfunc encode(with aCoder:NSCoder) {\n\t\taCoder.encode(title, forKey: PropertyKeys.title)\n\t\taCoder.encode(text, forKey: PropertyKeys.text)\n\t\taCoder.encode(timestamp, forKey: PropertyKeys.timestamp)\n\t}\n\t\n\trequired convenience init?(coder aDecoder: NSCoder) {\n\t\tguard let title = aDecoder.decodeObject(forKey: PropertyKeys.title) as? String,\n\t\t\tlet text = aDecoder.decodeObject(forKey: PropertyKeys.text) as? String,\n\t\t\tlet timestamp = aDecoder.decodeObject(forKey: PropertyKeys.timestamp) as? Date\n\t\t\telse {return nil}\n\t\tself.init(title: title,text: text,timestamp: timestamp)\n\t}\n}\n\nlet note1 = Note(title: \"Note One\", text: \"The first note.\", timestamp: Date())\nlet note2 = Note(title: \"Note Two\", text: \"The second note.\", timestamp: Date())\nlet note3 = Note(title: \"Note Three\", text: \"The third note.\", timestamp: Date())\nlet notes:[Note] = [note1,note2,note3]\n\nNote.saveToDisk(notes: notes)\nprint(Note.loadFromDisk() ?? \"No Data\")"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Codable</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Codable is an update in swift 4 that allows struct and enum to be encoded, unlike NSCoding only for class. Take a look at P20 Protocols for a quick example of encoding to JSON. Here we encode to a plist, which is basically a dictionary.</div><div>Codable conforms to both Encodable and Decodable. If only one of them is needed, only use one of them. If a Codable struct/class/whatever has a nested struct/subclass/whatever nested type, that type must be Codable too.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Syntax: try, try? and try!</h4>"
+    },
+    {
+      "type": "text",
+      "data": "try: used in a do { try ... } catch { ... } combo. If the <code>try</code> fails and returns an error, the <code>catch</code> can capture the error, e.g. <code>print(error.localizedDescription)</code>.<div>try?: Failable version of <code>try</code>. Returns an optional value, i.e. <code>nil</code> when failed. Use with <code>if let { try? ... } else { ... }</code>. The error is discarded.</div><div>try!: Forced-unwrapped version of <code>try</code>. If failed the application crashes.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct NotesCodable: Codable {\n\tlet title: String\n\tlet number: Int\n\tlet timestamp: Date\n\t\n\tstatic let documentsDirectory = FileManager.default.urls(for: .documentDirectory,in: .userDomainMask).first!\n\tstatic let archiveURL = documentsDirectory.appendingPathComponent(\"notesCodable\")\n\tstatic let archiveArrayURL = documentsDirectory.appendingPathComponent(\"notesArrayCodable\")\n}\n\nlet newNotes:NotesCodable = NotesCodable(title: \"Happy Meal\", number: 1, timestamp: Date())\n\n// start encoding\nlet propertyListEncoder = PropertyListEncoder()\nlet encodedNote = try? propertyListEncoder.encode(newNotes)\n\n// write to disk, noFileProtection means overwritable\ntry? encodedNote?.write(to: NotesCodable.archiveURL, options: .noFileProtection)\n\t\n// start decoding\nlet propertyListDecoder = PropertyListDecoder()\n\n// Using Do-Try-Catch, the error thrown can be captured; try throws the error and run catch\ndo {\n\tlet encodedNotesCodable = try Data.init(contentsOf: NotesCodable.archiveURL)\n\tlet decodedNote = try propertyListDecoder.decode(NotesCodable.self, from: encodedNotesCodable)\n\tprint(decodedNote)\n} catch {\n\tprint(error.localizedDescription)\n}\n\n// Using if-let, try? discards the error and return nil\nif let encodedNotesCodable = try? Data.init(contentsOf: NotesCodable.archiveURL),\n\tlet decodedNote = try? propertyListDecoder.decode(NotesCodable.self, from: encodedNotesCodable) {\n\tprint(decodedNote)\n}\n\n// Using guard-let\nfunc someFunc() -> NotesCodable? {\n\tguard let encodedNotesCodable = try? Data.init(contentsOf: NotesCodable.archiveURL)\n\t\telse {return nil}\n\tguard let decodedNote = try? propertyListDecoder.decode(NotesCodable.self, from: encodedNotesCodable)\n\t\telse {return nil}\n\tprint(decodedNote)\n\treturn decodedNote\n}\nsomeFunc()\n\n// For array\n\nlet newNotesArray:[NotesCodable] = [NotesCodable(title: \"Happy Meal\", number: 1, timestamp: Date()), NotesCodable(title: \"Unhappy Meal\", number: 2, timestamp: Date())]\nlet encodedNoteArray = try? propertyListEncoder.encode(newNotesArray)\ntry? encodedNoteArray?.write(to: NotesCodable.archiveArrayURL, options: .noFileProtection)\ndo {\n\tlet encodedNotesCodableArray = try? Data.init(contentsOf: NotesCodable.archiveArrayURL)\n\tlet decodedNoteArray = try propertyListDecoder.decode(Array<NotesCodable>.self, from: encodedNotesCodableArray!)\n\tprint(decodedNoteArray)\n} catch {\n\tprint(error.localizedDescription)\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Advance Codable: CodingKey</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Codable is better than NSCoding that a lot less code is needed, but in case manual operations are needed..."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct NotesManualCodable: Codable {\n\tlet noteTitle: String\n\tlet number: Int\n\tlet timestamp: Date?\n\tlet extraBool: Bool = false\n\t\n\tstatic let documentsDirectory = FileManager.default.urls(for: .documentDirectory,in: .userDomainMask).first!\n\tstatic let archiveURL = documentsDirectory.appendingPathComponent(\"NotesManualCodable\")\n\n\tenum CodingKeys: String, CodingKey {\n\t\t// Key name has to be 100% the same with property identifier for things to work\n\t\t// Can specify alt key to encode to and decode from, e.g. for use with backend that don't use camel case\n\t\t// Omit property names that do not have to be encoded and decoded\n\t\tcase noteTitle = \"note_title\"\t// the alt key\n\t\tcase number\n\t\tcase timestamp\n\t\t// leave extraBool out to use default value\n\t}\n}\n\n// Manual encoder & decoder\nextension NotesManualCodable {\n\tfunc encode(to encoder: Encoder) throws {\n\t\tvar container = encoder.container(keyedBy: CodingKeys.self)\n\t\ttry container.encode(noteTitle, forKey: .noteTitle)\n\t\ttry container.encode(number, forKey: .number)\n\t\ttry container.encode(timestamp, forKey: .timestamp)\n\t}\n\tinit(from decoder: Decoder) throws {\n\t\tlet container = try decoder.container(keyedBy: CodingKeys.self)\n\t\tnoteTitle = try container.decode(String.self, forKey: .noteTitle)\n\t\tnumber = try container.decode(Int.self, forKey: .number)\n\t\ttimestamp = try container.decode(Date?.self, forKey: .timestamp)\n\t}\n}\nlet newManualNote = NotesManualCodable(noteTitle: \"ABC\", number: 2, timestamp: Date())\n\n// start encoding\nlet manualJSONEncoder = JSONEncoder()\ndo {\n\tlet newManualEncodedNote = try manualJSONEncoder.encode(newManualNote)\n\tif let jsonString = String(data: newManualEncodedNote, encoding: .utf8) {\n\t\tprint(\"jsonString: \\(jsonString)\")\n\t}\n\ttry newManualEncodedNote.write(to: NotesManualCodable.archiveURL, options: .noFileProtection)\n} catch {\n\tprint(error.localizedDescription)\n}\n\t\n// start decoding\nlet manualJSONDecoder = JSONDecoder()\ndo {\n\tlet encodedNotesManualCodable = try Data.init(contentsOf: NotesManualCodable.archiveURL)\n\tlet decodedNote = try manualJSONDecoder.decode(NotesManualCodable.self, from: encodedNotesManualCodable)\n\tprint(decodedNote)\n} catch {\n\tprint(error.localizedDescription)\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Saving Images</h2>"
+    },
+    {
+      "type": "text",
+      "data": "How about other files that should not be encoded into a PLIST or a JSON? Well, just save it to disk."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let selectedPhoto = UIImage()\n\n// Saving\nlet documentsDirectory = FileManager.default.urls(for: .documentDirectory,in: .userDomainMask).first!\nlet photoURL = documentsDirectory.appendingPathComponent(\"photo.jpg\")\nif let data = UIImageJPEGRepresentation(selectedPhoto, 1) {\n\ttry? data.write(to: photoURL)\n\t// the try keyword is used for error handling.\n\t// try? means return nil if error\n\t// Alt use do { try } catch {}\n}\n\n// Loading\nUIImage(contentsOfFile: photoURL.path)"
+    }
+  ]
+}

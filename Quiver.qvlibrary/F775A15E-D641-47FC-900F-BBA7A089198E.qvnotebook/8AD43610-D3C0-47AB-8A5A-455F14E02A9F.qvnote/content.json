@@ -1,0 +1,52 @@
+{
+  "title": "Ch 031 Reference & Memory Management",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<p>Apple's documentation can be found here.</p><p><a href=\"https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/AutomaticReferenceCounting.html#//apple_ref/doc/uid/TP40014097-CH20-ID51\">https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/AutomaticReferenceCounting.html#//apple_ref/doc/uid/TP40014097-CH20-ID51</a><br></p>\n"
+    },
+    {
+      "type": "text",
+      "data": "<h2>How are objects put in and out of memory?</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Here is what happens:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class SimplePerson {\n\tlet name: String\n\t\n\tinit(name: String) {\n\t\tself.name = name\n\t\tprint(\"SimplePerson init \\(name)\")\n\t}\n\t\n\tdeinit {\n\t\tprint(\"SimplePerson deinit \\(self.name)\")\n\t}\n}\n\nvar ref1: SimplePerson?\nvar ref2: SimplePerson?\n\n\nref1 = SimplePerson(name: \"Jon\")\n// init happens below, first strong reference established, memory allocated\nref2 = ref1\nref1 = nil\n// deinit happens below, all strong ref destroyed, memory deallocated\nref2 = nil\n//:## "
+    },
+    {
+      "type": "text",
+      "data": "<h2>Strong Reference Cycle</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>It is possible to have a strong cycle loop where memory can never be deallocated.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class Person {\n\tlet name: String\n\tvar apartment: Apartment?\n\t\n\tinit(name: String) {\n\t\tself.name = name\n\t\tprint(\"Person init \\(name)\")\n\t}\n\t\n\tinit(name: String, apartment: Apartment) {\n\t\tself.name = name\n\t\tself.apartment = apartment\n\t\tprint(\"Person init \\(name) with appartment\")\n\t}\n\t\n\tdeinit {\n\t\tprint(\"Person deinit \\(self.name)\")\n\t}\n}\n\nclass Apartment {\n\tlet address: String\n//\tvar tenant: Person?\n\tweak var tenant: Person?\n\t\n\tinit(address: String) {\n\t\tself.address = address\n\t\tprint(\"Apartment init \\(address)\")\n\t}\n\t\n\tinit(address: String, tenant: Person) {\n\t\tself.address = address\n\t\tself.tenant = tenant\n\t\tprint(\"Apartment init \\(address) with tenant\")\n\t}\n\t\n\tdeinit {\n\t\tprint(\"Apartment deinit \\(self.address)\")\n\t}\n}\n\nvar dennis: Person?\nvar placeABC: Apartment?\ndennis = Person(name: \"Dennis Lau\")\nplaceABC = Apartment(address: \"PlaceABC\")\n// Up to this point, everything is cool\n// both var dennis and var placeABC have a strong ref to the respective Person and Apartment instance\n\ndennis!.apartment = placeABC\nplaceABC!.tenant = dennis\n// now this is fxxked, because with dennis.apartment and placeABC.tenent\n// the Person instance and the Apartment instance point to each other with a strong ref\n\ndennis = nil\n//placeABC = nil\n\n// check the console, despite both var dennis and var placeABC set to nil, the instances still aren't deinit"
+    },
+    {
+      "type": "text",
+      "data": "<div>To fix this, either one of apartment or tenent has to be declared as weak var</div><div>For example, say tenent is declared as weak var</div><div>dennis.apartment points to placeABC with strong ref</div><div>placeABC.tenant points to dennis with weak ref</div><div>If placeABC = nil, no memory is deallocated, because var dennis points to Person instance and Person instance points to placeABC in strong refs</div><div>However, if dennis = nil, memory is deallocated, because all strong refs to the Person instance are destroyed, with only the weak ref pointing from the instance property placeABC.tenent to the instance property dennis.apartment</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Unowned Reference</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Use this when an instance of a type only exists when an instance of another type exists.</div><div>E.g. Customer info &amp; credit card, obviously each credit card must have customer info</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class Customer {\n\tlet name: String\n\tvar card: CreditCard?\n\tinit(name: String) {\n\t\tself.name = name\n\t}\n\tdeinit { print(\"Customer \\(name) is being deinitialized\") }\n}\n\nclass CreditCard {\n\tlet number: Int\n\tunowned let customer: Customer\n\tinit(number: Int, customer: Customer) {\n\t\tself.number = number\n\t\tself.customer = customer\n\t}\n\tdeinit { print(\"Credit card #\\(number) is being deinitialized\") }\n}\n\nvar mark: Customer? = Customer(name: \"Mark Lau\")\nmark!.card = CreditCard(number: 12345678, customer: mark!)\n// Here, var mark strong ref to Customer instance, which strong ref to the CreditCard instance\n// The CreditCard instance's customer: property does not ref to anything, as it is unowned\n\nmark = nil\n\n// var mark is destroyed, the only strong ref i.e. the only ref to Customer is destroyed, so the Customer instance is destroyed\n// With the Customer instance destroyed, there is no more ref to the CreditCard instance, so it is destroyed too"
+    }
+  ]
+}
