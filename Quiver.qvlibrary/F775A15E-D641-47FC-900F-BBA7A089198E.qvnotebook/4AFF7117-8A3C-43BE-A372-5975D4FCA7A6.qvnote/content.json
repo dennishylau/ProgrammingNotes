@@ -1,0 +1,76 @@
+{
+  "title": "ADS 008 Collections",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Arrays</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var numberSet1:[Int] = []\nvar numberSet2 = [Int]()\nvar numberSet3: Array<Int> = []\nvar numberSet4 = [Int](repeating: 0, count: 100)\t\t// Init array with a hundred 0"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Array Methods</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// remember, array index starts from 0\n// assigning value to first position\nnumberSet5[0] = 1\n\n// Count\nnumberSet5.count\n\n// isEmpty\nif numberSet5.isEmpty {\n\tprint(\"numberSet5 is empty\")\n}\n\n// Contains\nvar numberSet1:[Int8] = [-127,0,127]\nif numberSet1.contains(127) {\n\tprint(\"It contains 127\")\n}\n\n// Append\nvar nameSet1:[String] = [\"Mary\"]\nnameSet1 += [\"John\"]\nnameSet1.append(\"Lily\")\nnameSet1.append(contentsOf:[\"Sue\",\"Grace\"])\n\n// Insert\nnameSet1.insert(\"Jack\", at: 0)\n// This inserts the item *before* the specified index\n\n// Remove\nnameSet1.remove(at: 0)\nnameSet1.removeLast()\nnameSet1.removeAll()\n\nvar nameSet2 = [\"Joe\"]\nnameSet1 + nameSet2\n\n// Map\nlet matrixR1 = [1,2,3]\nlet matrixR2 = [4,5,6]\nlet matrix = [matrixR1,matrixR2]\nmatrix[1][2]\n// Extract info from array using map method\nprint(\"Print matrix each row index 2\")\nprint(matrix.map {$0[2]})\t\t\t\t// Returns [3,6]"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Dictionary</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Dictionary is declared in sets of key:value pairs.</div><div>The key must be unique.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var userList1 = [Int:String]()\nvar userList2:[Int:String] = [:]\nvar userList3 = Dictionary<Int,String>()\nuserList1 = [1:\"Dennis\",2:\"Mark\"]\nuserList1[3] = \"Godfrey\"\n\n// The updateValue method changes value for specific key and returns the old value, nil if there is no old value\nlet oldValue = userList1.updateValue(\"Adrian\", forKey: 2)\nuserList1.updateValue(\"Anfield\", forKey: 4)\nuserList1\n\n// The removeValue method removes value and returns the old value\nuserList1.removeValue(forKey: 3)\nuserList1\n\n// Remove value by assigning nil to key using subscript syntax\nuserList1[2] = nil\nuserList1"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Convert To Array</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let userID = Array(userList1.keys)\nlet userName = Array(userList1.values)"
+    },
+    {
+      "type": "text",
+      "data": "<h4>If-Let Statement</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<div>The statement only runs if the constant name (oldValue, return value of the updateValue or removeValue method) is not nil</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "if let oldValue = userList1.updateValue(\"Matt\", forKey: 4) {\n\tprint(\"User 4 was \\(oldValue)\")\n}\nLook Up Value\nif let lookUp = userList1[4] {\n\tprint(\"User 4 is \\(lookUp)\")\n}\nif let lookUp = userList1[5] {\n\tprint(\"User 5 is \\(lookUp)\")\n}\n"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Nested Dictionary</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let shapesArray = [\"Circle\", \"Square\", \"Triangle\"]\nlet colorsArray = [\"Red\", \"Green\", \"Blue\"]\n\nvar elements:[String:[String]] = [\"Shapes\":shapesArray,\"Colors\":colorsArray]\n\n// Retrieve the last color element\n// This will crash if Colors returns nil\nlet colors = Array(elements[\"Colors\"]!)\nprint(colors.last!)\n\n// This is safer and thus recommanded\nif let colors = elements[\"Colors\"] {\n\tprint(colors[colors.count - 1])\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Counting &amp; Sorting</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let animalArray:[String] = [\"dog\",\"cat\",\"dog\",\"dog\",\"Parrot\",\"Parrot\"]\nvar countAnimal:[String: Int] = [:]\nfor animal in animalArray {\n\tcountAnimal[animal] = (countAnimal[animal] ?? 0) + 1\n\t//RHS = countAnimal[dog] if not nil, current value; if nil return 0 instead of nil\n}\nprint(countAnimal)\t\t\t\t\t\t\t\t\t\t// [\"Parrot\": 2, \"cat\": 1, \"dog\": 3]\nprint(countAnimal[\"rabbit\"] ?? \"no rabbit\")\t\t\t\t// no rabbit\nlet sortedAnimal = countAnimal.sorted(by: { $0.1 > $1.1 })\nprint(sortedAnimal)\t\t\t\t\t\t\t\t\t\t// [(key: \"dog\", value: 3), (key: \"Parrot\", value: 2), (key: \"cat\", value: 1)]\nlet topAnimal = countAnimal.sorted(by: { $0.1 > $1.1 }).first!.key\nprint(topAnimal)\t\t\t\t\t\t\t\t\t\t// dog"
+    }
+  ]
+}

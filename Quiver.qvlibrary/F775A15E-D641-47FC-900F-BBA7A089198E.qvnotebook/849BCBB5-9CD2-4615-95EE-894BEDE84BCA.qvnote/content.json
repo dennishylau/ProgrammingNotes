@@ -1,0 +1,48 @@
+{
+  "title": "ADS 012 Type Casting",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Type Check</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Assume <code>Male</code> is a subclass of the&nbsp;<code>Human</code> class, the following control flow condition will return true, otherwise false."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "if Male is Human {\n\t// run code\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Type Casting</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Downcasting is used to declare an object as a subclass of a certain class, so the functions and properties of the subclass can be accessed.</div><div>E.g. Downcasting a segue destination ViewController as <code>HomeScreenViewController</code>​, a particular subclass of VC.</div>In the case when you cannot be sure about the class or type of an item in a collection or a return value, use the type cast operator as?. Returns nil if fail."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class Animals {\n\tvar name: String\n\t\n\tinit(name:String) {\n\t\tself.name = name\n\t}\n}\nclass Dogs:Animals {\n\tfunc walkDog() {\n\t\tprint(\"Walking \\(name) the dog.\")\n\t}\n}\nclass Cats:Animals {\n\tfunc cleanLitterBox() {\n\t\tprint(\"Cleaning \\(name)'s litter box.\")\n\t}\n}\n\nfunc getAllPets() -> [Animals] {\n\tlet dog1 = Dogs(name: \"Brad\")\n\tlet cat1 = Cats(name: \"Kitty\")\n\treturn [dog1,cat1]\n}\n\nlet clientPets = getAllPets()\n// Here we don't know what specific types clientPets are of\n// So we use if let and downcast Animals into Dogs, Cats etc\n\nfor pet in clientPets {\n\tif let dog = pet as? Dogs {\n\t\t// Here we are downcasting clientPets of class Animals to Dogs, a subclass of Animals\n\t\tdog.walkDog()\n\t} else if let cat = pet as? Cats {\n\t\tcat.cleanLitterBox()\n\t}\n}\n\n// Use as! only if 100% sure about the type\nlet dog2 = Dogs(name: \"Billy\")\n\nfunc getMyPet() -> Animals {\n\treturn dog2\n}\n\nlet myDog = getMyPet() as! Dogs\nmyDog.walkDog()"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Any &amp; AnyObject</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>These are special types:</div><div><ul><li>Any is for an instance of any type<br></li><li>AnyObject is for any class, but NOT struct<br></li></ul></div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let anyArray:[Any] = [1,1.5,\"Hi\"]"
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}

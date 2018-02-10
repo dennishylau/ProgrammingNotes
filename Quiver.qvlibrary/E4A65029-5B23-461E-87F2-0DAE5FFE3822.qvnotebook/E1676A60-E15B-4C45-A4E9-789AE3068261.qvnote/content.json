@@ -1,0 +1,49 @@
+{
+  "title": "Switching Environment For iOS",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Dev Env</h2>"
+    },
+    {
+      "type": "text",
+      "data": "RequestBuilder.swift&nbsp;line 71"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "static var url:String = \"http://prod-test.ap-northeast-1.elasticbeanstalk.com\""
+    },
+    {
+      "type": "text",
+      "data": "ChatViewController line 319"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "_webSocket = SRWebSocket(url: URL(string: \"ws://prod-test.ap-northeast-1.elasticbeanstalk.com/cable\"))"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Prod Env</h2>"
+    },
+    {
+      "type": "text",
+      "data": "RequestBuilder.swift"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "static var url:String = \"http://api.resbo.com.hk\""
+    },
+    {
+      "type": "text",
+      "data": "ChatViewController"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "_webSocket = SRWebSocket(url: URL(string: \"ws://api.resbo.com.hk/cable/\"))"
+    }
+  ]
+}

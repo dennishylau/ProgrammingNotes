@@ -1,0 +1,54 @@
+{
+  "title": "ADS 002 Control Flow",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Logic Operators</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "\"==\"        // Equal\n\"!=\"        // Not equal\n\">\"         // Larger\n\">=\"        // Larger or equal\n\"<\"         // Smaller\n\"<=\"        // Smaller or equal\n\"&&\"        // AND\n\"||\"        // OR\n\"!\"         // NOT"
+    },
+    {
+      "type": "text",
+      "data": "<h2>IF Statement</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let temperatureOutside = 25\nif temperatureOutside >= 20 && temperatureOutside <= 27 {        // If temp is between 20 AND 27\n    print(\"Temp is just right\")\n}\n\nlet macPowered = \"pluggedIn\"\nif macPowered == \"batteryAbove20\" || macPowered == \"pluggedIn\" { // If either pluggedIn OR batteryAbove20\n    print(\"OK Mac is still on\")\n}\n\nlet tempExceeds100 = true\nif !tempExceeds100 {                                             // If NOT tempExceeds100\n    print(\"Water ain't boiling\")\n} else {\n    print(\"Water is boiling\")\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Switch Statement</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var peopleTravelling = 30\nswitch peopleTravelling {                                        // A switch statement must be exhaustive, or include a default case\ncase 1:\n    print(\"This is gonna be one lonely trip.\")\ncase 2:\n    print(\"Arhh romantic huh?\")\ncase 3:\n    print(\"This is gonna be awkward...\")\ncase 4, 5, 6:\n    print(\"OK this is gonna be noisy.\")                          // Multiple conditions\ncase 7...19:\n    print(\"God I hate travelling in a large group.\")             // Interval matching for number range, using the closed range operator\ncase 20..<30:\n    print(\"I can't breathe\")\t\t\t\t\t\t\t\t\t// Ignores 30, using the half open range operator\ndefault:\n    print(\"Just too many damn people!\")                          // Default case\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Ternary Operator (?)</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var getBigNumber1: Int\nvar getBigNumber2: Int\nlet a = 20\nlet b = 10\nif a > b {\t\t\t\t\t\t// Using IF/ELSE\n    getBigNumber1 = a\n} else {\n    getBigNumber1 = b\n}\ngetBigNumber2 = a > b ? a : b    // Using Ternary"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Nil-Coalescing Operator (??)</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Basically a special kind of ternary for nil.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var returnC1: Int\nvar returnC2: Int\nlet c:Int? = 20\nlet d = 10\nreturnC1 = c != nil ? c! : d\nreturnC2 = c ?? d\n\n// The two above are exactly the same\n// Return C if not nil, otherwise return D"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "title": "ADS 021 App Life Cycle",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>App States</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div><ul><li>Active: running in foreground and receiving touch events.<br></li><li>Inactive: running in foreground but not receiving touch events, can still be running code.<br></li><li>Background: app goes to BG when user quits app, only stays in BG briefly before being suspended. Even when suspended, may periodically go back into BG for location events and remote notifications. Do minimal work.<br></li><li>Not Running: not launched or killed.</li></ul></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Typical Flow</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// Launch App\n```will finish launching```\n```did finish launching```\n```did become active```\n// Press home button\n```will resign active```\n```did enter background```\n// Go back to App\n```will enter foreground```\n```did become active```\n// Multitask screen\n```will resign active```\n// Go back to App\n```did become active```\n// kill App\n```will terminate```"
+    },
+    {
+      "type": "text",
+      "data": "<h2>App Delegate Functions</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div><code>willFinishLaunchingWithOptions</code>:</div><div>First point of customisation upon completion of launch</div><div><code>didFinishLaunchingWithOptions</code>:</div><div>Final initialization before app is displayed to the user</div><div><code>applicationDidBecomeActive</code>:</div><div>Called after becoming the foreground app</div><div>Used for any last minute preparation and to refresh user interface</div><div><code>applicationWillResignActive</code>:</div><div>Called when app is about to move from foreground to background, can be caused by quitting app or temporary interuption such as phone call</div><div>Good for saving user progress and reduce data processing</div><div><code>applicationDidEnterBackground</code>:</div><div>Called right after applicationWillResignActive, after having entered background, have around 5 seconds to run before  suspension</div><div>Used to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state</div><div><code>applicationWillEnterForeground</code>:</div><div>Called when going from background to foreground but not yet active</div><div>Used to undo many of the changes made on entering the background</div><div><code>applicationWillTerminate</code>:</div><div>Called when app is about to be terminated and released from memory, but won't be called if app is already suspended</div><div>Used to save user data</div>"
+    },
+    {
+      "type": "text",
+      "data": "<div></div><h2>applicationDidEnterBackground v. applicationWillTerminate</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div></div><div><ul><li><code>applicationDidEnterBackground</code>: for apps that are allowed to run in the BG, such as GPS, music, audio<br></li><li><code>applicationWillTerminate</code>: for apps that don't run in the BG<br></li></ul></div>"
+    }
+  ]
+}

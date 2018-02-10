@@ -1,0 +1,26 @@
+{
+  "title": "ADS 023 Scroll & Zoom",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>ScrollView</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div><ol><li>Put SV into View, then put content insider SV<br></li><li>In storyboard, select VC with SV inside, CMD+OPT+5, set sim size to freeform to view long SV content<br></li></ol></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Zoom</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Conform VC class to <code>UIScrollViewDelegate</code>, then create <code>@IBOutlet</code> for both the SV and the view with the content. Remember to call <code>UIScrollViewDelegate</code> method <code>viewForZooming</code>:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class ViewController: UIViewController, UIScrollViewDelegate {\n\n\t@IBOutlet weak var scrollView: UIScrollView!\n\t@IBOutlet weak var imageView: UIImageView!\n\t\n\toverride func viewDidLoad() {\n\t\tsuper.viewDidLoad()\n\t\timageView.image = #imageLiteral(resourceName: \"iphoneResolution\")\n\t\tscrollView.delegate = self\n\t\t// set VC instance as the delegate of scrollView\n\t\t\n\t\tinitZoomFor(view.bounds.size)\n\t}\n\t\n\tfunc viewForZooming(in scrollView: UIScrollView) -> UIView? {\n\t\treturn imageView\n\t}\n\t\n\tfunc initZoomFor(_ size: CGSize) {\n\t\tlet widthScale = size.width / imageView.bounds.width\n\t\tlet heightScale = size.height / imageView.bounds.height\n//\t\tdivide screen size by image size\n\n\t\tlet scale = min(widthScale, heightScale)\n//\t\tget min of two so entire image will show\n\t\t\n\t\tscrollView.minimumZoomScale = scale\n\t\tscrollView.zoomScale = scale\n//\t\tSo init whole content will show\n\t}\n}"
+    }
+  ]
+}

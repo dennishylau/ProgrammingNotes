@@ -1,0 +1,116 @@
+{
+  "title": "001.1 Table View Life Cycle",
+  "cells": [
+    {
+      "type": "text",
+      "data": "Source:&nbsp;<a href=\"https://medium.com/capital-one-developers/smooth-scrolling-in-uitableview-and-uicollectionview-a012045d77f\">https://medium.com/capital-one-developers/smooth-scrolling-in-uitableview-and-uicollectionview-a012045d77f</a>"
+    },
+    {
+      "type": "text",
+      "data": "<div>The main interaction between UITableView and UITableViewCell can be described by the following events:</div><div><ul><li><code>tableView(_:cellForRowAt:)</code>: The table view is requesting the cell that needs to be displayed.<br></li><li><code>tableView(_:willDisplay:forRowAt:)</code>: The table view is about to display the cell.<br></li><li><code>tableView(_:didEndDisplaying:forRowAt:)</code>: The cell has been removed from the table view.<br></li></ul></div><div>For all the above events, the table view is passing the index (row) for which the interaction is taking place.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<img src=\"quiver-image-url/668CE7571B8F8E8BE7C72FB7FD41CE35.png\" alt=\"1*ctoS0IV59d_JVipYzyApmw.png\" width=\"773\" height=\"643\">"
+    },
+    {
+      "type": "text",
+      "data": "The key to smooth scrolling is to&nbsp;<code>tableView(_:cellForRowAt:)</code>&nbsp;run as fast as possible."
+    },
+    {
+      "type": "text",
+      "data": "<h2>MVVM</h2>"
+    },
+    {
+      "type": "text",
+      "data": "MVVM stands for&nbsp;Model–View–ViewModel. It is better than MVC (Model-View-Controller) in that it decouples the the view display logic from both the view controller and the model. A view display logic is csomething like taking a <code>Date</code> and changing it into a presentable <code>String</code>."
+    },
+    {
+      "type": "text",
+      "data": "<div>MVC theoretically:&nbsp;<img alt=\"Typical Model-View-Controller setup\" width=\"408\" height=\"159\" src=\"quiver-image-url/B72CE59D59141E70382E1F33BCB383F2.png\"></div><div>MVC in reality: &nbsp; &nbsp; &nbsp;&nbsp;<img alt=\"Intermediate\" width=\"324\" height=\"94\" src=\"quiver-image-url/616F158C601BF44FA7C483F613A35097.png\"></div>MVVM:&nbsp;<img alt=\"Model-View-ViewModel\" width=\"484\" height=\"94\" src=\"quiver-image-url/CDFB2044425B6D05569B5658D5FB371D.png\">"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Structure</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Say for a TV that list a set of User, the model will be:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct User {\n    let avatarUrl: String\n    let username: String\n    let role: Role\n    \n    init(avatarUrl: String, username: String, role: Role) {\n        self.avatarUrl = avatarUrl\n        self.username = username\n        self.role = role\n    }\n}\n\nenum Role: String {\n    case Unknown = \"Unknown\"\n    case User = \"User\"\n    case Owner = \"Owner\"\n    case Admin = \"Admin\"\n\n    static func get(from: String) -> Role {\n        if from == User.rawValue {\n            return .User\n        } else if from == Owner.rawValue {\n            return .Owner\n        } else if from == Admin.rawValue {\n            return .Admin\n        }\n        return .Unknown\n    }\n}"
+    },
+    {
+      "type": "text",
+      "data": "And the view model will be:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct UserViewModel {\n    let avatarUrl: String\n    let username: String\n    let role: Role\n    let roleText: String\n    \n    init(user: User) {\n        // Avatar\n        avatarUrl = user.avatarUrl\n        \n        // Username\n        username = user.username\n        \n        // Role\n        role = user.role\n        roleText = user.role.rawValue\n    }\n}"
+    },
+    {
+      "type": "text",
+      "data": "<div>Data for the users is fetched through a web service asynchronously. Our goal:</div><div><ul><li>Avoid blocking the main thread while fetching data.<br></li><li>Updating the table view right after we retrieve the data.<br></li></ul></div>"
+    },
+    {
+      "type": "text",
+      "data": "To do this, use a model controller like this:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class UserViewModelController {\n\n    fileprivate var viewModels: [UserViewModel?] = []\n\n    func retrieveUsers(_ completionBlock: @escaping (_ success: Bool, _ error: NSError?) -> ()) {\n        let urlString = ... // Users Web Service URL\n        let session = URLSession.shared\n        \n        guard let url = URL(string: urlString) else {\n            completionBlock(false, nil)\n            return\n        }\n        let task = session.dataTask(with: url) { [weak self] (data, response, error) in\n            guard let strongSelf = self else { return }\n            guard let data = data else {\n                completionBlock(false, error as NSError?)\n                return\n            }\n            let error = ... // Define a NSError for failed parsing\n            if let jsonData = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [[String: AnyObject]] {\n                guard let jsonData = jsonData else {\n                    completionBlock(false,  error)\n                    return\n                }\n                var users = [User?]()\n                for json in jsonData {\n                    if let user = UserViewModelController.parse(json) {\n                        users.append(user)\n                    }\n                }\n\n                strongSelf.viewModels = UserViewModelController.initViewModels(users)\n                completionBlock(true, nil)\n            } else {\n                completionBlock(false, error)\n            }\n        }\n        task.resume()\n    }\n\n    var viewModelsCount: Int {\n        return viewModels.count\n    }\n\n    func viewModel(at index: Int) -> UserViewModel? {\n        guard index >= 0 && index < viewModelsCount else { return nil }\n        return viewModels[index]\n    }\n    \n}\n\nprivate extension UserViewModelController {\n\n    static func parse(_ json: [String: AnyObject]) -> User? {\n        let avatarUrl = json[\"avatar\"] as? String ?? \"\"\n        let username = json[\"username\"] as? String ?? \"\"\n        let role = json[\"role\"] as? String ?? \"\"\n        return User(avatarUrl: avatarUrl, username: username, role: Role.get(from: role))\n    }\n\n    static func initViewModels(_ users: [User?]) -> [UserViewModel?] {\n        return users.map { user in\n            if let user = user {\n                return UserViewModel(user: user)\n            } else {\n                return nil\n            }\n        }\n    }\n\n}"
+    },
+    {
+      "type": "text",
+      "data": "Then, in the VC:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class MainViewController: UITableViewController {\n\n    fileprivate let userViewModelController = UserViewModelController()\n\n    override func viewDidLoad() {\n        super.viewDidLoad()\n\n        userViewModelController.retrieveUsers { [weak self] (success, error) in\n            guard let strongSelf = self else { return }\n            if !success {\n                DispatchQueue.main.async {\n                    let title = \"Error\"\n                    if let error = error {\n                        strongSelf.showError(title, message: error.localizedDescription)\n                    } else {\n                        strongSelf.showError(title, message: NSLocalizedString(\"Can't retrieve contacts.\", comment: \"The message displayed when contacts can’t be retrieved.\"))\n                    }\n                }\n            } else {\n                DispatchQueue.main.async {\n                    strongSelf.tableView.reloadData()\n                }\n            }\n        }\n    }\n\n    [...]\n\n}"
+    },
+    {
+      "type": "text",
+      "data": "<div>Placing the above in <code>viewDidLoad()</code>, <code>viewWillAppear(_:)</code>, or in a <code>UIUpdate()</code>.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Loading &amp; Caching Image</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Simply use <code>URLSession</code>:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "extension UIImageView {\n\n    func downloadImageFromUrl(_ url: String, defaultImage: UIImage? = UIImageView.defaultAvatarImage()) {\n        guard let url = URL(string: url) else { return }\n        URLSession.shared.dataTask(with: url, completionHandler: { [weak self] (data, response, error) -> Void in\n            guard let httpURLResponse = response as? NSHTTPURLResponse where httpURLResponse.statusCode == 200,\n                let mimeType = response?.mimeType, mimeType.hasPrefix(\"image\"),\n                let data = data where error == nil,\n                let image = UIImage(data: data)\n            else {\n                return\n            }\n        }).resume()\n    }\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Customize Cell</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Subclass User cell from <code>UITableViewCell</code> or <code>UICollectionViewCell</code>."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class UserCell: UITableViewCell {\n    @IBOutlet weak var avatar: UIImageView!\n    @IBOutlet weak var username: UILabel!\n    @IBOutlet weak var role: UILabel!\n    \n    func configure(_ viewModel: UserViewModel) {\n        avatar.downloadImageFromUrl(viewModel.avatarUrl)\n        username.text = viewModel.username\n        role.text = viewModel.roleText\n    }\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Render Cell</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {\n    let cell = tableView.dequeueReusableCell(withIdentifier: \"UserCell\", for: indexPath) as! UserCell\n    \n    if let viewModel = userViewModelController.viewModel(at: (indexPath as NSIndexPath).row) {\n        cell.configure(viewModel)\n    }\n    \n    return cell\n}"
+    }
+  ]
+}

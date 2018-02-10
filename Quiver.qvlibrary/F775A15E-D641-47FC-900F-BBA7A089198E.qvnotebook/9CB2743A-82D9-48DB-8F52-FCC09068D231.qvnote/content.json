@@ -1,5 +1,5 @@
 {
-  "title": "Ch 037P Practice: Guided Project 5",
+  "title": "ADS 037P Practice: Guided Project 5",
   "cells": [
     {
       "type": "text",
@@ -138,7 +138,7 @@
     {
       "type": "code",
       "language": "swift",
-      "data": "var categories = [String]()\n@IBOutlet weak var refresher: UIRefreshControl!\n\noverride func viewDidLoad() {\n    super.viewDidLoad()\n\tMenuController.shared.fetchCategories { (categoryData) in\n\t\tif let categoryData = categoryData {\n\t\t\tself.updateUI(with: categoryData)\n\t\t}\n\t}\n}\n\nfunc updateUI(with categoryData: [String]) {\n\tDispatchQueue.main.async {\n\t\tself.categories = categoryData\n\t\tself.tableView.reloadData()\n\t}\n}\n\n@IBAction func refreshTable(_ sender: Any) {\n\tMenuController.shared.fetchCategories { (categoryData) in\n\t\tif let categoryData = categoryData {\n\t\t\tself.updateUI(with: categoryData)\n\t\t\tDispatchQueue.main.async {\n\t\t\t\tself.refresher.endRefreshing()\n\t\t\t}\n\t\t}\n\t}\n}"
+      "data": "var categories = [String]()\n@IBOutlet weak var refresher: UIRefreshControl!\n\noverride func viewDidLoad() {\n    super.viewDidLoad()\n\tMenuController.shared.fetchCategories { (categoryData) in\n\t\tif let categoryData = categoryData {\n\t\t\tself.updateUI(with: categoryData)\n\t\t}\n\t}\n}\n\nfunc updateUI(with categoryData: [String]) {\n\tDispatchQueue.main.async {\n\t\tself.categories = categoryData\n\t\tself.tableView.reloadData()\n\t}\n}\n\n@IBAction func refreshTable(_ sender: Any) {\n\tMenuController.shared.fetchCategories { (categoryData) in\n\t\tif let categoryData = categoryData {\n\t\t\tself.updateUI(with: categoryData)\n\t\t}\n\t\tDispatchQueue.main.async {\n\t\t\tself.refresher.endRefreshing()\n\t\t}\n\t}\n}"
     },
     {
       "type": "text",
@@ -169,7 +169,7 @@
     {
       "type": "code",
       "language": "swift",
-      "data": "var selectedCategory = String()\nvar menuItems:[MenuItem] = []\n@IBOutlet weak var refresher: UIRefreshControl!\n\noverride func viewDidLoad() {\n    super.viewDidLoad()\n\tnavigationItem.title = selectedCategory.capitalized\n\tnavigationItem.largeTitleDisplayMode = .never\n\t// Use above line to force regular title size\n\tMenuController.shared.fetchMenuItems(category: selectedCategory) { (menuData) in\n\t\tif let menuData = menuData {\n\t\t\tself.updateUI(with: menuData)\n\t\t}\n\t}\n}\n\nfunc updateUI(with menuData: [MenuItem]) {\n\tDispatchQueue.main.async {\n\t\tself.menuItems = menuData\n\t\tself.tableView.reloadData()\n\t}\n}\n\n@IBAction func refreshTable(_ sender: Any) {\n\tMenuController.shared.fetchMenuItems(category: selectedCategory) { (menuData) in\n\t\tif let menuData = menuData {\n\t\t\tself.updateUI(with: menuData)\n\t\t\tDispatchQueue.main.async {\n\t\t\t\tself.refresher.endRefreshing()\n\t\t\t}\n\t\t}\n\t}\n}"
+      "data": "var selectedCategory = String()\nvar menuItems:[MenuItem] = []\n@IBOutlet weak var refresher: UIRefreshControl!\n\noverride func viewDidLoad() {\n    super.viewDidLoad()\n\tnavigationItem.title = selectedCategory.capitalized\n\tnavigationItem.largeTitleDisplayMode = .never\n\t// Use above line to force regular title size\n\tMenuController.shared.fetchMenuItems(category: selectedCategory) { (menuData) in\n\t\tif let menuData = menuData {\n\t\t\tself.updateUI(with: menuData)\n\t\t}\n\t}\n}\n\nfunc updateUI(with menuData: [MenuItem]) {\n\tDispatchQueue.main.async {\n\t\tself.menuItems = menuData\n\t\tself.tableView.reloadData()\n\t}\n}\n\n@IBAction func refreshTable(_ sender: Any) {\n\tMenuController.shared.fetchMenuItems(category: selectedCategory) { (menuData) in\n\t\tif let menuData = menuData {\n\t\t\tself.updateUI(with: menuData)\n\t\t\tprint(\"Menu refresh ok\")\n\t\t} else {\n\t\t\tprint(\"Menu refresh error\")\n\t\t}\n\t\tDispatchQueue.main.async {\n\t\t\tself.refresher.endRefreshing()\n\t\t}\n\t}\n}"
     },
     {
       "type": "text",
@@ -324,6 +324,24 @@
       "type": "code",
       "language": "swift",
       "data": "let temporaryDirectory = NSTemporaryDirectory()\nlet urlCache = URLCache(memoryCapacity: 25000000, diskCapacity: 50000000, diskPath: temporaryDirectory)\nURLCache.shared = urlCache"
+    },
+    {
+      "type": "text",
+      "data": "In <code>MenuController</code>:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func fetchItemImage(imageURL: URL, completion: @escaping(UIImage?) -> Void) {\n\tvar imageURLComponents = URLComponents(url: imageURL, resolvingAgainstBaseURL: true)\n\timageURLComponents?.host = \"denniss-macbook-pro.local\"\n\tguard let imageExternalURL = imageURLComponents?.url else {completion(nil); return}\n\t\n\tlet imageDataTask = URLSession.shared.dataTask(with: imageExternalURL) { (data, response, error) in\n\t\tif let data = data,\n\t\t\tlet image = UIImage(data: data) {\n\t\t\tcompletion(image)\n\t\t} else {\n\t\t\tcompletion(nil)\n\t\t}\n\t}\n\timageDataTask.resume()\n}"
+    },
+    {
+      "type": "text",
+      "data": "Go to <code>MenuTableViewController</code>, <code>cellForRowAt</code>&nbsp;before <code>return cell</code>:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "MenuController.shared.fetchItemImage(imageURL: menuItem.imageURL) { (image) in\n\tguard let image = image else {return}\n\tDispatchQueue.main.async {\n\t\tif let currentIndexPath = self.tableView.indexPath(for: cell), currentIndexPath != indexPath {return}\t\t// This is needed so that the right image will show up in the right cell after reuse\n\t\t\t// currentIndexPath: reusable cell index path, indexPath: currently rendering cell\n\t\tcell.imageView?.image = image\n\t}\n}"
     },
     {
       "type": "text",

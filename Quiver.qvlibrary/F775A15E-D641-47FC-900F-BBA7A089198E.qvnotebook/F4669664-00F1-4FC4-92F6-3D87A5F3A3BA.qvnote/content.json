@@ -1,0 +1,56 @@
+{
+  "title": "ADS 018 View Controller Life Cycle",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>6 States &amp; 5 Methods</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Note that calling the will methods does not guarantee the did methods will be called.</div><div>E.g. viewWillDisappear() called does not guarantee viewDidDisappear() callback</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "view not loaded\nviewDidLoad()\nviewWillAppear()\nviewDidAppear()\nviewWillDisappear()\nviewDidDisappear()"
+    },
+    {
+      "type": "text",
+      "data": "<h2>View Event Management</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Why always use the override and super keywords?</div><div><div>UIViewController already has its own vDL method defined, so we must override to run anything else. But it contains code that should run for all VC subclasses, so call super.viewDidLoad() to run all superclass code becfore any subclass code.</div></div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func viewDidLoad() {\n\tsuper.viewDidLoad()\n\t<Subclass code here>\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Methods</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div><code>viewDidLoad()</code></div><div>This method is called when the VC finishes loading views into memory. Frequently used to perform view init, network requests and DB access.</div><div>Use this to perform one-time functions.</div><div><code>viewWillAppear()</code></div><div>Called EVERYTIME before the view appears on the screen.</div><div>Great for: starting network requests, refreshing or updating views such as status bar, nav bar or table views, and adjusting to new screen orientations.<br></div><div><code>viewDidAppear()</code></div><div>For work that has to be done everytime the view appears, but might take more than a few seconds.</div><div>This way, the long function will not slow down the appearing of the view.</div><div><code>viewWillDisappear()</code></div><div>Great for: saving edits, hiding the keyboard, cancelling network requests.</div><div><code>viewDidDisappear()</code></div><div>Great for stopping services of the view, such as playing audio or removing notification observer.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Switching Views</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// Launch App\nVC1 - viewDidLoad\nVC1 - viewWillAppear\nVC1 - viewDidAppear\n// Press VC2 Tab Bar Button\nVC2 - viewDidLoad\nVC2 - viewWillAppear\nVC1 - viewWillDisappear\nVC1 - viewDidDisappear\nVC2 - viewDidAppear\n// Press VC1 Tab Bar Button\nVC1 - viewWillAppear\nVC2 - viewWillDisappear\nVC2 - viewDidDisappear\nVC1 - viewDidAppear"
+    },
+    {
+      "type": "text",
+      "data": "<h2>View Destruction</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Embeded in NC, say VC1 -&gt; VC2 -&gt; VC3</div><div><ul><li>VC1 is kept in memory when VC1 &gt; VC2<br></li><li>VC2 is kept in momory when VC2 &gt; VC3<br></li><li>VC3 is destroyed when VC3 &gt; VC2<br></li><li>VC2 is destroyed when VC2 &gt; VC1<br></li></ul></div>"
+    }
+  ]
+}

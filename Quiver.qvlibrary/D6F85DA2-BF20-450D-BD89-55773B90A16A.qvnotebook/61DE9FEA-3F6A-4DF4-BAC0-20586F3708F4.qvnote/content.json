@@ -1,0 +1,27 @@
+{
+  "title": "003 Lazy initialization",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<div>Delay the creation of an object until it’s referenced, thus only use memory when needed. Useful when:</div><div><ul><li>Initial value for a property is dependent on outside factors until after an instance’s initialization is complete</li><li>Initial value for a property requires complex or computationally expensive setup that should not be performed unless it is needed<br></li></ul></div>Note that a container with lazy var within has to be declared as var too."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "lazy var systems = [\"Apple\",\"Windows\"]\n\n// Closure\n\nlazy var players: [String] = {\n        var temporaryPlayers = [String]()\n        temporaryPlayers.append(\"John Doe\")\n        return temporaryPlayers\n        }()\n\n// Instance method\n\nlazy var players: [String] = self.initialPlayers()\n    \nfunc initialPlayers() -> [String] {\n    var players = [\"John Doe\"]\n    return players\n}\n\n// Class method\n\nclass TestClass {\n    lazy var players = TestClass.initialPlayers()\n    \n    class func initialPlayers() -> [String] {\n        var players = [\"John Doe\"]\n        return players\n    }\n    \n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Closure &amp; self</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class NormalPerson {\n\t\n\tvar name: String\n\t\n\tlazy var personalizedGreeting: String = {\n//\t[unowned self] in\t\t\t\t\t\t\t// Not needed\n\t\treturn \"Hello, \\(self.name)!\"\n\t}()\n\t\n\tinit(name: String) {\n\t\tself.name = name\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "Note: although the class-var-self structure looks like a retain cycle that will cause memory leak, the immediately applied closure <code>{}()</code> is considered <code>@noescape</code>&nbsp;and does not retain the captured <code>self</code>."
+    }
+  ]
+}

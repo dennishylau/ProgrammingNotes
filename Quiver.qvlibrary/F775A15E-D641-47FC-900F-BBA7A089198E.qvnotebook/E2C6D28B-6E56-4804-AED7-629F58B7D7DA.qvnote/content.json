@@ -1,0 +1,102 @@
+{
+  "title": "ADS 024 Dynamic Table View",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Table View</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Easiest way to add a TV is to drag a NC from the object library</div><div>Two styles:&nbsp;Plain: just cells, with index;&nbsp;Grouped: groups with header and footer, without index<br>Editing Mode:&nbsp;Off by default, enables insert, delete and reorder<br></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>UITableViewCells</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div></div><div>IndexPath: 0 based, var section, var row</div><div>Style (enum): .default -- imageView, textLabel, .subtitle -- imageView, textLabel, detailTextLabel, .value1 -- imageView, textLabel, detailTextLabel, .value2 -- textLabel, detailTextLabel</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>UITableViewCellAccessoryType</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Accessory (enum):</div><div><ul><li>.disclosureIndicator -- chevron<br></li><li>.detailDisclosureButton -- i with arrow<br></li><li>.checkmark -- checkmark<br></li><li>.detailButton -- textLabel, detailTextLabel<br></li></ul></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>TV &amp; TVC</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>The TV does not manage its own contents. Instead, the TVC does.</div><div>The TVC conforms to two protocols:</div><div><ol><li>UITableViewDataSource -- Defines TV numberOfSections, numberOfRowsInSection and cellForRowAt -&gt; UITableViewCell<br></li><li>UITableViewDelegate -- Everything else, incl. visuals, manage selection, accessory view, editing etc<br></li></ol></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Data Source</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func numberOfSections(in tableView: UITableView) -> Int"
+    },
+    {
+      "type": "text",
+      "data": "<div>This method has an optional modifier. If not called, assume only 1 section.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int"
+    },
+    {
+      "type": "text",
+      "data": "<div>Required method for number of rows. Arguments needed for specifying the caller TV, and the specific section containing said rows.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell"
+    },
+    {
+      "type": "text",
+      "data": "<div>Required method for cell content. Arguments needed for specifying the caller TV, and the specific indexPath containing said cell.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Dequeueing</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>TV only loads visible cells and a few upcoming ones. Reuse Prototype Cell of the same cell type to save memory.</div><div><ol><li>Fetch correct cell type by dequeueing the right prototype cell<br></li><li>Fecth Model Object to be displayed<br></li><li>Set cell View Object according to Model Object<br></li><li>Return UITableViewCell (TVC)<br></li></ol></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Delegates</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Introducing 2 of them:</div><div><ul><li>accessoryButtonTappedForRowWith<br></li><li>didSelectRowAt<br></li></ul></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Example 1 (Plain, Edit, Reorder, Delete)</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class EmojiTableViewController: UITableViewController {\n\t\n\t// No need for manual IBOutlet for tableView property\n\t\n\tstruct Emoji {\n\t\tlet symbol: String\n\t\tlet name: String\n\t\tlet description: String\n\t\tlet usage: String\n\t\t\n\t\tinit(symbol: String, name: String, description: String, usage: String) {\n\t\t\tself.symbol = symbol\n\t\t\tself.name = name\n\t\t\tself.description = description\n\t\t\tself.usage = usage\n\t\t}\n\t\t\n\t}\n\t\n\tvar emojis: [Emoji] = [\n\t\tEmoji(symbol: \"😀\", name: \"Grinning Face\", description: \"A typical smiley face.\", usage: \"happiness\"),\n\t\tEmoji(symbol: \"😕\", name: \"Confused Face\", description: \"A confused, puzzled face.\", usage: \"unsurewhat to think; displeasure\"),\n\t\tEmoji(symbol: \"😍\", name: \"Heart Eyes\", description: \"A smiley face with hearts for eyes.\",usage: \"love of something; attractive\"),\n\t\tEmoji(symbol: \"👮\", name: \"Police Officer\", description: \"A police officer wearing a blue cap with a gold badge.\", usage: \"person of authority\"),\n\t\tEmoji(symbol: \"🐢\", name: \"Turtle\", description: \"A cute turtle.\", usage: \"Something slow\"),\n\t\tEmoji(symbol: \"🐘\", name: \"Elephant\", description: \"A gray elephant.\", usage: \"good memory\"),\n\t\tEmoji(symbol: \"🍝\", name: \"Spaghetti\", description: \"A plate of spaghetti.\", usage: \"spaghetti\"),\n\t\tEmoji(symbol: \"🎲\", name: \"Die\", description: \"A single die.\", usage: \"taking a risk, chance; game\"),\n\t\tEmoji(symbol: \"⛺️\", name: \"Tent\", description: \"A small tent.\", usage: \"camping\"),\n\t\tEmoji(symbol: \"📚\", name: \"Stack of Books\", description: \"Three colored books stacked on each other.\", usage: \"homework, studying\"),\n\t\tEmoji(symbol: \"💔\", name: \"Broken Heart\", description: \"A red, broken heart.\", usage: \"extreme sadness\"),\n\t\tEmoji(symbol: \"💤\", name: \"Snore\", description: \"Three blue \\'z\\'s.\", usage: \"tired, sleepiness\"),\n\t\tEmoji(symbol: \"🏁\", name: \"Checkered Flag\", description: \"A black-and-white checkered flag.\", usage: \"completion\"),\n\t\tEmoji(symbol: \"⛺️\", name: \"Tent\", description: \"A small tent.\", usage: \"camping\"),\n\t\tEmoji(symbol: \"📚\", name: \"Stack of Books\", description: \"Three colored books stacked on each other.\", usage: \"homework, studying\"),\n\t\tEmoji(symbol: \"💔\", name: \"Broken Heart\", description: \"A red, broken heart.\", usage: \"extreme sadness\"),\n\t\tEmoji(symbol: \"💤\", name: \"Snore\", description: \"Three blue \\'z\\'s.\", usage: \"tired, sleepiness\"),\n\t\tEmoji(symbol: \"🏁\", name: \"Checkered Flag\", description: \"A black-and-white checkered flag.\", usage: \"completion\"),\n\t\tEmoji(symbol: \"⛺️\", name: \"Tent\", description: \"A small tent.\", usage: \"camping\"),\n\t\tEmoji(symbol: \"📚\", name: \"Stack of Books\", description: \"Three colored books stacked on each other.\", usage: \"homework, studying\"),\n\t\tEmoji(symbol: \"💔\", name: \"Broken Heart\", description: \"A red, broken heart.\", usage: \"extreme sadness\"),\n\t\tEmoji(symbol: \"💤\", name: \"Snore\", description: \"Three blue \\'z\\'s.\", usage: \"tired, sleepiness\"),\n\t\tEmoji(symbol: \"🏁\", name: \"Checkered Flag\", description: \"A black-and-white checkered flag.\", usage: \"completion\")\n\t]\n\t\n\toverride func viewDidLoad() {\n\t\tsuper.viewDidLoad()\n\t//\tThis automatically switches EDIT <-> Done\n\t\tnavigationItem.leftBarButtonItem = editButtonItem\n\t}\n\t\n\t//\tEdit button\n\t@IBAction func editButtonTapped(_ sender: UIBarButtonItem) {\n\t\tlet tableViewEditingMode = tableView.isEditing\n\t\ttableView.setEditing(!tableViewEditingMode, animated: true)\n\t}\n\t\n\t//\tMARK: - Table view data source\n\t\n\t//\tDefine number of sections\n\toverride func numberOfSections(in tableView: UITableView) -> Int {\n\t\t// Hardcode, only one section\n\t\treturn 1\n\t}\n\t\n\t//\tDefine section header\n\t/*\toverride func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {\n\t}\n\t*/\n\t\n\t//\tDefine number of rows\n\toverride func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {\n\t\t// section count base number is 0\n\t\tif section == 0 {\n\t\t\treturn emojis.count\n\t\t} else {\n\t\t\treturn 0\n\t\t}\n\t}\n\t\n\t//\tDeclares cell content\n\toverride func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {\n\t\tlet cell = tableView.dequeueReusableCell(withIdentifier: \"EmojiCell\", for: indexPath)\n\t\t\n\t\t//      let emoji = emojis[indexPath.section][indexPath.row]\n\t\tlet emoji = emojis[indexPath.row]\n\t\t\n\t\tcell.textLabel?.text = \"\\(emoji.symbol) - \\(emoji.name)\"\n\t\tcell.detailTextLabel?.text = emoji.description\n\t\t//\t\tcell.showsReorderControl = true\t\t\t<-- not needed if moveRowAt is implemented\n\t\treturn cell\n\t}\n\t\n\t//\tMARK: - Table view delegate\n\t\n\t//\tSet side index shortcut for section\n\t/*\toverride func sectionIndexTitles(for tableView: UITableView) -> [String]? {\n\treturn [\"S1\", \"S2\", \"S3\"]\n\t}\n\t*/\n\t\n\t//\tDefine accessory action\n\toverride func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {\n\t\tlet emoji = emojis[indexPath.row]\n\t\tlet alert = UIAlertController(title: \"\\(emoji.symbol) - \\(emoji.name)\", message: emoji.usage, preferredStyle: UIAlertControllerStyle.alert)\n\t\talert.addAction(UIAlertAction(title: \"OK\", style: UIAlertActionStyle.default, handler: nil))\n\t\tself.present(alert, animated: true, completion: nil)\n\t}\n\t\n\t//\tDefine selection action, with animated deselection\n\toverride func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {\n\t\tlet emoji = emojis[indexPath.row]\n\t\tprint(\"\\(emoji.symbol) \\(indexPath)\")\n\t\ttableView.deselectRow(at: indexPath, animated: true)\n\t}\n\t\n\t//\tOverride to support reordering\n\toverride func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {\n\t\tlet movedEmoji = emojis.remove(at: sourceIndexPath.row)\n\t\temojis.insert(movedEmoji, at: destinationIndexPath.row)\n\t\ttableView.reloadData()\n\t}\n\t\n\t//\tOverride to support delete\n\toverride func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {\n\t\treturn true\n\t}\n\t\n\t//\tOverride to get IndexPath for deletion and update tableView\n\toverride func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {\n\t\tif editingStyle == .delete {\n\t\t\temojis.remove(at: indexPath.row)\n\t\t\ttableView.deleteRows(at: [indexPath], with: .fade)\n\t\t}\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Example 2 (Grouped)</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class FoodTableViewController: UITableViewController {\n\t\n\tstruct Meal {\n\t\tvar name: String\n\t\tvar food: [Food]\n\t}\n\n\tstruct Food {\n\t\tvar name: String\n\t\tvar description: String\n\t}\n\t\n\tvar meals: [Meal] = [\n\t\tMeal(name:\"Breakfast\", food: [\n\t\t\tFood(name:\"Scrambled Egg\",description:\"Egg and dairy\"),\n\t\t\tFood(name:\"Frankfurter Wurst\",description:\"Pork\"),\n\t\t\tFood(name:\"Milk\",description:\"Dairy\")\n\t\t\t]\n\t\t),\n\t\tMeal(name: \"Lunch\", food: [\n\t\t\tFood(name: \"Eel Rice\", description: \"Fish and carbohydrate\"),\n\t\t\tFood(name: \"Salad\", description: \"Nuts\"),\n\t\t\tFood(name: \"Cream Soup\", description: \"Dairy\")\n\t\t\t]\n\t\t),\n\t\tMeal(name: \"Dinner\", food: [\n\t\t\tFood(name: \"Toro Sushi\", description: \"Fist and carbohydrate\"),\n\t\t\tFood(name: \"Yakitori\", description: \"Poutry\"),\n\t\t\tFood(name: \"Ramen\", description: \"Carbohydrate\")\n\t\t\t]\n\t\t)\n\t]\n\t\n\toverride func viewDidLoad() {\n\t\tsuper.viewDidLoad()\n\t\t\n\t\t// Uncomment the following line to preserve selection between presentations\n\t\t// self.clearsSelectionOnViewWillAppear = false\n\t\t\n\t\t// Uncomment the following line to display an Edit button in the navigation bar for this view controller.\n\t\t// self.navigationItem.rightBarButtonItem = self.editButtonItem\n\t}\n\t\n\toverride func didReceiveMemoryWarning() {\n\t\tsuper.didReceiveMemoryWarning()\n\t\t// Dispose of any resources that can be recreated.\n\t}\n\t\n\t// MARK: - Table view data source\n\t\n\toverride func numberOfSections(in tableView: UITableView) -> Int {\n\t\treturn meals.count\n\t}\n\t\n\toverride func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {\n\t\t// section is a var of IndexPath, starts with 0\n\t\treturn meals[section].food.count\n\t}\n\t\n\toverride func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {\n\t\tlet cell = tableView.dequeueReusableCell(withIdentifier: \"foodCell\", for: indexPath)\n\t\t\n\t\tlet meal = meals[indexPath.section]\n\t\tlet food = meal.food[indexPath.row]\n\t\t\n\t\tcell.textLabel?.text = food.name\n\t\tcell.detailTextLabel?.text = food.description\n\t\t\n\t\treturn cell\n\t}\n\t\n\toverride func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {\n\t\treturn meals[section].name\n\t}\n\t\n}\n\n"
+    }
+  ]
+}

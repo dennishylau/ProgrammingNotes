@@ -1,5 +1,5 @@
 {
-  "title": "Tricks",
+  "title": "TRK 000 Tricks: Misc",
   "cells": [
     {
       "type": "text",
@@ -24,32 +24,6 @@
     {
       "type": "text",
       "data": "<div>Class: inheritance from superclass to sunclass; defines methods and properties within; the *implementor* of protocol</div><div>Protocol: by composition, no need to consider inheritance hierachy; define general conformity requirements about *what* methods and properties are needed to do task, but not *how* the method is written to do said task; the \"interface\" definition</div>"
-    },
-    {
-      "type": "text",
-      "data": "<h2>LaunchScreen Status Bar Sytle</h2>"
-    },
-    {
-      "type": "text",
-      "data": "Go to&nbsp;<code>info.plist</code>, add&nbsp;<code>Status bar is initially hidden = true</code>, then to restore after launching, go to&nbsp;<code>AppDelegate</code> <code>didFinishLaunchingWithOptions</code>:"
-    },
-    {
-      "type": "code",
-      "language": "swift",
-      "data": "UIApplication.shared.isStatusBarHidden = false"
-    },
-    {
-      "type": "text",
-      "data": "<h3>Change Status Bar Color On Condition</h3>"
-    },
-    {
-      "type": "text",
-      "data": "Go to <code>info.plist</code>, add <code>View controller-based status bar appearance = No</code>, then in the specific VC's <code>viewDidLoad</code>:"
-    },
-    {
-      "type": "code",
-      "language": "swift",
-      "data": "if condition {\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.default\n} else {\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent\n}\n\n// Alternatively\n\noverride func viewWillAppear(_ animated: Bool) {\n\tsuper.viewWillAppear(animated)\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent\n}\n\noverride func viewWillDisappear(_ animated: Bool) {\n\tsuper.viewWillDisappear(animated)\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.default\n}"
     },
     {
       "type": "text",
@@ -102,15 +76,6 @@
     },
     {
       "type": "text",
-      "data": "<h2>BarButton System Item &amp; Dismiss Modal VC</h2>"
-    },
-    {
-      "type": "code",
-      "language": "swift",
-      "data": "override func viewDidLoad() {\n\tsuper.viewDidLoad()\n\tif let modelObject = modelObject {\n\t// Do something\n\t} else {\n\t\tnavigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismissVC))\n\t}\n}\n\n@objc func dismissVC() {\n\tself.dismiss(animated: true, completion: nil)\n}\n"
-    },
-    {
-      "type": "text",
       "data": "<h2>TV Cell Auto Resize Fail</h2>"
     },
     {
@@ -150,19 +115,6 @@
     },
     {
       "type": "text",
-      "data": "<h2>Show Network Indicator</h2>"
-    },
-    {
-      "type": "text",
-      "data": "Remember to set to false at some point in implementation."
-    },
-    {
-      "type": "code",
-      "language": "swift",
-      "data": "UIApplication.shared.isNetworkActivityIndicatorVisible = true"
-    },
-    {
-      "type": "text",
       "data": "<h2>Adjust UIImageView Aspect Ratio To Fit Image</h2>"
     },
     {
@@ -182,40 +134,6 @@
       "type": "code",
       "language": "swift",
       "data": "let impact = UIImpactFeedbackGenerator(style: .heavy)\t\t// The normal type, use for button press etc., can set strength\nlet selection = UISelectionFeedbackGenerator()\t\t\t\t// Weak ass type, use for slider selection etc.\nlet notification = UINotificationFeedbackGenerator()\t\t// Weaird ass type, with system predefined vibration pattern, use to convey success, warning or error\nimpact.impactOccurred()\nselection.selectionChanged()\nnotification.notificationOccurred(.error)"
-    },
-    {
-      "type": "text",
-      "data": "<h2>Tab Bar Badge</h2>"
-    },
-    {
-      "type": "text",
-      "data": "Call this method when array is updated."
-    },
-    {
-      "type": "code",
-      "language": "swift",
-      "data": "func updateBadgeNumber() {\n\tlet badgeValue = someArray.count > 0 ? \"\\(someArray.count)\" : nil\n\tnavigationController?.tabBarItem.badgeValue = badgeValue\n}"
-    },
-    {
-      "type": "text",
-      "data": "<h2>Animate Badge</h2>"
-    },
-    {
-      "type": "text",
-      "data": "Call&nbsp;<code>animateTabBarBadgeAt(tabNumber:)</code> upon update."
-    },
-    {
-      "type": "code",
-      "language": "swift",
-      "data": "func animateTabBarBadgeAt(tabNumber: Int) {\n\t\n\t// tabNumber starts with 1\n\tguard let view = self.tabBarController?.tabBar.subviews[tabNumber] else {return}\n\t\n\tfor subview in (view.subviews) {\n\t\tlet viewType = String(describing: type(of: subview))\n\t\tif viewType == \"_UIBadgeView\" {\n\t\t\tanimateView(view: subview)\n\t\t}\n\t}\n}\n\nfunc animateView(view:UIView){\n\t\n\t// Must call layoutIfNeeded first to have it init at the right position\n\tview.layer.layoutIfNeeded()\n\t\n\t// Horizontal shake\n\tlet shakeAnimation = CABasicAnimation(keyPath: \"position\")\n\tshakeAnimation.duration = 0.04\n\tshakeAnimation.repeatCount = 4\n\tshakeAnimation.autoreverses = true\n\tshakeAnimation.fromValue = NSValue(cgPoint: CGPoint(x:view.center.x - 1, y:view.center.y))\n\tshakeAnimation.toValue = NSValue(cgPoint: CGPoint(x:view.center.x + 1, y:view.center.y))\n\tview.layer.add(shakeAnimation, forKey: \"position\")\n\t\n\t// Scale once without the translation, scale every time with it\n\tlet scaleTransform = CGAffineTransform(scaleX: 1.2, y: 1.2)\n\tlet translateTransform = CGAffineTransform(translationX: view.layer.frame.width * 0.1, y: view.layer.frame.height * 0.1)\n\tview.layer.transform = CATransform3DMakeAffineTransform(translateTransform)\n\tUIView.animate(withDuration: 0.3, animations: {\n\t\tview.layer.transform = CATransform3DMakeAffineTransform(scaleTransform)\n\t})\n}"
-    },
-    {
-      "type": "text",
-      "data": "<h2>Use Large Title In Navigation Bar</h2>"
-    },
-    {
-      "type": "text",
-      "data": "Check Prefers Larger Titles in Navigation Bar.&nbsp;<div>To use regular title size in other VC, call <code>navigationItem.largeTitleDisplayMode = .never​</code> in <code>viewDidLoad</code></div>"
     },
     {
       "type": "text",
@@ -269,6 +187,45 @@
       "type": "code",
       "language": "swift",
       "data": "let temporaryDirectory = NSTemporaryDirectory()\nlet urlCache = URLCache(memoryCapacity: 25000000, diskCapacity: 50000000, diskPath: temporaryDirectory)\nURLCache.shared = urlCache"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Changing Year Of Date</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let gregorianCalendar: Calendar = Calendar(identifier: .gregorian)\nlet currentDate = gregorianCalendar.startOfDay(for: Date())\nlet dobDatePicker = UIDatePicker()\ndobDatePicker.minimumDate = gregorianCalendar.date(byAdding: .year, value: -100, to: currentDate)\ndobDatePicker.maximumDate = gregorianCalendar.date(byAdding: .year, value: -16, to: currentDate)"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Counting &amp; Sorting Array Items</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let animalArray:[String] = [\"dog\",\"cat\",\"dog\",\"dog\",\"Parrot\",\"Parrot\"]\nvar countAnimal:[String: Int] = [:]\nfor animal in animalArray {\n\tcountAnimal[animal] = (countAnimal[animal] ?? 0) + 1\n\t//RHS = countAnimal[dog] if not nil, current value; if nil return 0 instead of nil\n}\nprint(countAnimal)\t\t\t\t\t\t\t\t\t\t// [\"Parrot\": 2, \"cat\": 1, \"dog\": 3]\nprint(countAnimal[\"rabbit\"] ?? \"no rabbit\")\t\t\t\t// no rabbit\nlet sortedAnimal = countAnimal.sorted(by: { $0.1 > $1.1 })\nprint(sortedAnimal)\t\t\t\t\t\t\t\t\t\t// [(key: \"dog\", value: 3), (key: \"Parrot\", value: 2), (key: \"cat\", value: 1)]\nlet topAnimal = countAnimal.sorted(by: { $0.1 > $1.1 }).first!.key\nprint(topAnimal)\t\t\t\t\t\t\t\t\t\t// dog"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Suppress Unused Return Value Warning</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Add&nbsp;<code>@discardableResult</code> above the line."
+    },
+    {
+      "type": "text",
+      "data": "<h2>Reuseable Cell Index Path Display Right Image</h2>"
+    },
+    {
+      "type": "text",
+      "data": "To display the correct asychronously downloaded images in reusable cells, the <code>indexPath</code> must be checked.&nbsp;Call this in&nbsp;<code>cellForRowAt</code>:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {\n    let cell = tableView.dequeueReusableCell(withIdentifier: \"MenuItemCell\", for: indexPath)\n\tlet menuItem = menuItems[indexPath.row]\n\t\n\tMenuController.shared.fetchItemImage(imageURL: menuItem.imageURL) { (image) in\n\t\tguard let image = image else {return}\n\t\tDispatchQueue.main.async {\n\t\t\tif let currentIndexPath = self.tableView.indexPath(for: cell), currentIndexPath != indexPath {return}\n\t\t\t// This is needed so that the right image will show up in the right cell after reuse\n\t\t\t// currentIndexPath: reusable cell index path, indexPath: currently rendering cell\n\t\t\tcell.imageView?.image = image\n\t\t}\n\t}\n    return cell\n}"
     }
   ]
 }

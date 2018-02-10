@@ -1,0 +1,55 @@
+{
+  "title": "002 Home Screen Quick Action",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Info.plist</h2>"
+    },
+    {
+      "type": "text",
+      "data": "For example, we are trying to add a Home Screen Quick Action \"Add\" button that shows up when App Icon is force touched. First, complete the program before doing this. Have all the controllers and things in place. Then, go to <code>Info.plist</code>:<div><ol><li>Add <code>UIApplicationShortcutItems</code>: <code>Array</code><br></li><li>Within it, add <code>Item 0</code>: <code>Dictionary</code></li><li>Within <code>Item 0</code>, add:<br></li></ol></div>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>UIApplicationShortcutItemTitle: String = Add</li><li>UIApplicationShortcutItemSubtitle: String =&nbsp;Add Reservation</li><li>UIApplicationShortcutItemIconType: String =&nbsp;UIApplicationShortcutIconTypeAdd</li><li>UIApplicationShortcutItemType: String =&nbsp;AddReservation<br></li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>AppDelegate</h2>"
+    },
+    {
+      "type": "text",
+      "data": "There are two options on where to handle quick action invocation:<div><ol><li><code>application(_:willFinishLaunchingWithOptions:)</code> or <code>application(_:didFinishLaunchingWithOptions:)</code><br></li><li><code>application(_:performActionFor:completionHandler:)</code><br></li></ol></div>"
+    },
+    {
+      "type": "text",
+      "data": "<div>When launching app, <code>didFinishLaunchingWithOptions</code> is called.&nbsp;</div><div>On the other hand, <code>performActionFor</code> is also called when either of these happens:</div><div><ol><li>True is returned at the end of&nbsp;<code>didFinishLaunchingWithOptions</code>&nbsp;<br></li><li>App is already running, and brought into foreground using quick action<br></li></ol></div><div>According to documentation, return false in&nbsp;<code>didFinishLaunchingWithOptions</code>&nbsp;if the app cannot handle the URL resource or continue a user activity, otherwise return true. This means that in order to avoid calling the action method twice when launching, if all handling is done in&nbsp;<code>didFinishLaunchingWithOptions</code>, return false to prevent&nbsp;<span style=\"background-color: rgb(232, 232, 232);\"></span><code>performActionFor</code> from being called during launch.</div>"
+    },
+    {
+      "type": "text",
+      "data": "WARNING: when&nbsp;didFinishLaunchingWithOptions is called, <code>rootViewController</code>&nbsp;has not been initialized. Therefore, if the quick action involves it or anything related, simply return true in&nbsp;<span style=\"color: rgb(0, 0, 0); font-family: Menlo, Consolas, &quot;Ubuntu Mono&quot;, Monaco, source-code-pro, monospace; font-size: 16.200000762939453px; background-color: rgb(232, 232, 232);\">didFinishLaunchingWithOptions</span>&nbsp;and leave all handling work to&nbsp;<span style=\"color: rgb(0, 0, 0); font-family: Menlo, Consolas, &quot;Ubuntu Mono&quot;, Monaco, source-code-pro, monospace; font-size: 16.200000762939453px; background-color: rgb(232, 232, 232);\">performActionFor</span>."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func handleShortcut(_ shortcut: UIApplicationShortcutItem) -> Bool {\n\tvar handled: Bool = false\n\tswitch shortcut.type {\n\tcase \"AddReservation\":\n\t\tif let rootNavigationViewController = window!.rootViewController as? UINavigationController,\n\t\t\tlet rootViewController = rootNavigationViewController.viewControllers.first as UIViewController? {\n\t\t\trootNavigationViewController.popToRootViewController(animated: false)\n\t\t\trootViewController.performSegue(withIdentifier: \"AddReservation\", sender: nil)\n\t\t\thandled = true\n\t\t}\n\tdefault:\n\t\thandled = false\n\t}\n\treturn handled\n}\n\nfunc application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {\n\tcompletionHandler(handleShortcut(shortcutItem))\n}"
+    },
+    {
+      "type": "text",
+      "data": "What does <code>completionHandler</code>&nbsp;boolean do? No idea, documentation just says to pass in true for successful handling and false otherwise. Does not seem to affect anything."
+    },
+    {
+      "type": "text",
+      "data": "<h2>Bonus</h2>"
+    },
+    {
+      "type": "text",
+      "data": "For things that should be handled in&nbsp;<code>didFinishLaunchingWithOptions</code> during launch:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {\n\tvar hasCompletedQuickActionHandling = false\n\t\n\t// launchOptions is an optional dictionary, can pass to app things like bluetooth event, location etc\n\t// shortcutItem is the UIApplicationShortcutItem array containing all Quick Actions\n\tif let shortcutItem = launchOptions?[UIApplicationLaunchOptionsKey.shortcutItem] as? UIApplicationShortcutItem {\n\t\thandleQuickAction(shortcutItem)\n\t\tprint(\"App launched with Quick Action\")\n\t\thasCompletedQuickActionHandling = true\n\t}\n\t\n\t// When false is returned, application(_:performActionForShortcutItem:completionHandler:) will not be called\n\treturn !hasCompletedQuickActionHandling\n}\n\nfunc handleQuickAction(_ shortcut: UIApplicationShortcutItem) -> Bool {\n\tvar handled: Bool\n\tswitch shortcut.type {\n\tcase \"SomeAction\":\n\t\t// handling code\n\t\thandled = true\n\tdefault:\n\t\thandled = false\n\t}\n\treturn handled\n}\n\nfunc application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {\n\t// Returns true to completionHandler to indicate success of quick action implementation code\n\tcompletionHandler(handleQuickAction(shortcutItem))\n}"
+    }
+  ]
+}

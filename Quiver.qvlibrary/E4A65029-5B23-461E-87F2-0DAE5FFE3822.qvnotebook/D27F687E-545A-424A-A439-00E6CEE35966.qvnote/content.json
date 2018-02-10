@@ -1,0 +1,14 @@
+{
+  "title": "Change iOS Tutorial",
+  "cells": [
+    {
+      "type": "text",
+      "data": "IntroController.swift:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "imgView.image = UIImage(named:\"\\(i+1)\")"
+    }
+  ]
+}

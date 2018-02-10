@@ -1,0 +1,53 @@
+{
+  "title": "ADS 029 Keyboard & Responder",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Fix Keyboard Covering Content</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class KeyboardFixedViewController: UIViewController {\n\t\n\t@IBOutlet weak var scrollView: UIScrollView!\n\t\n\toverride func viewDidLoad() {\n\t\tsuper.viewDidLoad()\n\t\tregisterForKeyboardNotifications()\n\t}\n\t\n\tfunc registerForKeyboardNotifications() {\n\t\tNotificationCenter.default.addObserver(self, selector:#selector(keyboardWasShown(_:)),name: .UIKeyboardDidShow, object: nil)\n\t\tNotificationCenter.default.addObserver(self, selector:#selector(keyboardWillBeHidden(_:)),name: .UIKeyboardWillHide, object: nil)\n\t\tNotificationCenter.default.addObserver(self,selector:#selector(changeInputMode(_:)), name: .UITextInputCurrentInputModeDidChange, object: nil)\n\t\t// Alt can use UIKeyboardWillChangeFrame instead of language change\n\t}\n\t\n\t@objc func keyboardWasShown(_ notification: NSNotification) {\n\t\tguard let keyboardFrameValue = notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue\n\t\t\telse { return }\n\t\t\n\t\tlet keyboardFrame = keyboardFrameValue.cgRectValue\n\t\tlet keyboardSize = keyboardFrame.size\n\t\t\n\t\tlet contentInsets = UIEdgeInsetsMake(0.0, 0.0,keyboardSize.height, 0.0)\n\t\tscrollView.contentInset = contentInsets\n\t\tscrollView.scrollIndicatorInsets = contentInsets\n\t}\n\t\n\t@objc func keyboardWillBeHidden(_ notification: NSNotification) {\n\t\tlet contentInsets = UIEdgeInsets.zero\n\t\tscrollView.contentInset = contentInsets\n\t\tscrollView.scrollIndicatorInsets = contentInsets\n\t}\n\t\n\t@objc func changeInputMode(_ notification: NSNotification) {\n\t\tprint(\"Language changed.\")\n\t\tguard let keyboardFrameValue = notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue\n\t\t\telse { return }\n\t\t\n\t\tlet keyboardFrame = keyboardFrameValue.cgRectValue\n\t\tlet keyboardSize = keyboardFrame.size\n\t\t\n\t\tlet contentInsets = UIEdgeInsetsMake(0.0, 0.0,keyboardSize.height, 0.0)\n\t\tscrollView.contentInset = contentInsets\n\t\tscrollView.scrollIndicatorInsets = contentInsets\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Tap To Dismiss Keyboard</h2>"
+    },
+    {
+      "type": "text",
+      "data": "First add the following code, then add Tap Gesture Recogniser to VC and set&nbsp;action.<br>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "@IBAction func closeKeyboard(_ sender: Any!) {\n\tview.endEditing(true)\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Keyboard Toolbar</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>1. Drag a UIToolbar from ObjLib to the bar *above* the VC, the thing with the First Responder and the Exit button</div><div>2. Set it up with UIBarButtonItem</div><div>3. Set up outlet for UIToolbar, actions for the buttons</div><div>4. Tag the UIResponder, such as UITextField, in numeric order starting from 1</div><div>5. Open a new swift file, set up extension for UIView:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "import Foundation\nimport UIKit\n\nextension UIView {\n\tfunc currentFirstResponder() -> UIResponder? {\n\t\tif self.isFirstResponder {\n\t\t\treturn self\n\t\t}\n\t\tfor view in self.subviews {\n\t\t\tif let responder = view.currentFirstResponder() {\n\t\t\t\treturn responder\n\t\t\t}\n\t\t}\n\t\treturn nil\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "6. Conform class to UITextFieldDelegate so textFieldShouldReturn can be called, the code:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class ExampleViewController: UITableViewController, UITextFieldDelegate {\n\tfunc getPreviousResponderFor(tag: Int) -> UITextField? {\n\t\treturn self.view.viewWithTag(tag - 1) as? UITextField\n\t}\n\n\tfunc getNextResponderFor(tag: Int) -> UITextField? {\n\t\treturn self.view.viewWithTag(tag + 1) as? UITextField\n\t}\n\n\t@IBAction func keyboardPreviousButtonTapped(_ sender: UIBarButtonItem) {\n\t\tguard let currentFirstResponder = self.view.currentFirstResponder() as? UITextField else {return}\n\t\tif let previousResponder = getPreviousResponderFor(tag: currentFirstResponder.tag)  {\n\t\t\tcurrentFirstResponder.resignFirstResponder()\t\t// not necessary\n\t\t\tpreviousResponder.becomeFirstResponder()\n\t\t} else {\n\t\t\tview.endEditing(true)\n\t\t}\n\t}\n\n\t@IBAction func keyboardNextButtonTapped(_ sender: UIBarButtonItem) {\n\t\tguard let currentFirstResponder = self.view.currentFirstResponder() as? UITextField else {return}\n\t\tif let nextResponder = getNextResponderFor(tag: currentFirstResponder.tag) {\n\t\t\tcurrentFirstResponder.resignFirstResponder()\t\t// not necessary\n\t\t\tnextResponder.becomeFirstResponder()\n\t\t} else {\n\t\t\tview.endEditing(true)\n\t\t}\n\t}\n\n\t@IBAction func keyboardCloseButtonTapped(_ sender: Any) {\n\t\tview.endEditing(true)\n\t}\n\n\t// Press enter to go to next field\n\tfunc textFieldShouldReturn(_ textField: UITextField) -> Bool {\n\t\tguard let currentFirstResponder = self.view.currentFirstResponder() as? UITextField else {return true}\n\t\tif let nextResponder = getNextResponderFor(tag: currentFirstResponder.tag) {\n\t\t\tcurrentFirstResponder.resignFirstResponder()\t\t// not necessary\n\t\t\tnextResponder.becomeFirstResponder()\n\t\t} else {\n\t\t\tview.endEditing(true)\n\t\t}\n\t\treturn true\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "title": "HWS 000 Introduction",
+  "cells": [
+    {
+      "type": "text",
+      "data": "All the basic stuff like type inference, basic arithmetic, string interpolation etc."
+    },
+    {
+      "type": "text",
+      "data": "<h2>Type Of</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// To find out the type of a declaration\nvar array: [Any] = [1,1.2,\"hello\"]\ntype(of: array)\t\t\t\t\t\t\t// returns Array<Any>.Type"
+    },
+    {
+      "type": "text",
+      "data": "Then it goes through array and loops."
+    },
+    {
+      "type": "text",
+      "data": "<h2>Loops Break &amp; Continue</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<code>break</code> stops the loop from running."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var counter: Int = 0\n\nwhile counter < 5 {\n\tcounter += 1\n\t\n\tif counter == 3 {\n\t\tbreak\n\t}\n\t\n\tprint(\"Counting \\(counter)\")\n}\n// Prints:\n// Counting 1\n// Counting 2"
+    },
+    {
+      "type": "text",
+      "data": "<code>continue</code> brings the loop back to the start."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var counter: Int = 0\n\nwhile counter < 5 {\n\tcounter += 1\n\t\n\tif counter == 3 {\n\t\tcontinue\n\t}\n\t\n\tprint(\"Counting \\(counter)\")\n}\n// Prints:\n// Counting 1\n// Counting 2\n// Counting 4\n// Counting 5"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Implicitly Unwrapped Optional</h2>"
+    },
+    {
+      "type": "text",
+      "data": "The usual optionals are declared using <code>?</code> and are contained in a wrapper with either an actual value or <code>nil</code>. An optional declared with a <code>!</code>, on the other hand, are not contained in a wrapper, and can thus be used directly.&nbsp;"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "@IBOutlet weak var someButton: UIButton!"
+    },
+    {
+      "type": "text",
+      "data": "If it is called without a value that it should have, the app will crash."
+    },
+    {
+      "type": "text",
+      "data": "<h2>Enum With Values</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Enum where the case takes in parameters"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "enum WeatherType {\n\tcase sunny\n\tcase cloudy\n\tcase rainy\n\tcase windy(speed: Int, rainy: Bool)\n}\n\nfunc emotion(when weather: WeatherType) -> String! {\n\tswitch weather {\n\tcase .sunny:\n\t\treturn \"happy\"\n\tcase .cloudy, .rainy:\n\t\treturn \"sad\"\n\n\tcase .windy(let speed, _) where speed < 10:\n\t\t// rainy value does not matter\n\t\treturn \"lonely\"\n\tcase .windy(let speed, let rainy) where speed >= 10:\n\t\t// declare parameters in the same order as in the enum declaration\n\t\tif rainy == true {\n\t\t\treturn \"Super lonely and wet at a level \\(speed)\"\n\t\t} else {\n\t\t\treturn \"Super lonely at a level \\(speed)\"\n\t\t}\n\t\t\n\tdefault:\n\t\treturn nil\n\t}\n}\n\nemotion(when: .windy(speed: 10, rainy: false))"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Functions Compatibility</h2>"
+    },
+    {
+      "type": "text",
+      "data": "For some part of Apple's operating system to call a Swift method, the method will need to be marked <code>@objc</code>&nbsp;before <code>func</code>.<div>To mark all methods in a struct, use <code>@objcMembers</code> before <code>struct</code>.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Value Type vs Reference Type</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Value Type: Struct is copied in a way the all its values are duplicated, separate memory allocated.<div>Reference Type: Class is copied in a way the copied object still point to the original object's reference, all copies share the same reference in memory.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Property Observer</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Called when a property <code>willSet</code> or <code>didSet</code>. Variables called <code>newValue</code> and <code>oldValue</code> can be used in their scope respectively."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct airConditionorTemperature {\n\tstatic var currentTemperature: Double = 25.5 {\n\t\twillSet {\n\t\t\tprint(\"Changing temperature from \\(currentTemperature) to \\(newValue).\")\n\t\t}\n\t\tdidSet {\n\t\t\tprint(\"Did change temperature from \\(oldValue) to \\(currentTemperature).\")\n\t\t}\n\t}\n}\n\nairConditionorTemperature.currentTemperature = 20\n\n// Console:\n// Changing temperature from 25.5 to 20.0.\n// Did change temperature from 25.5 to 20.0."
+    },
+    {
+      "type": "text",
+      "data": "<h2>Computed Properties Get &amp; Set</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Get: compute target variable from other variables<div>Set: set target variable, and computer other variables from it</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct Rectangle {\n\tvar width: Double\n\tvar height: Double\n\tvar center: [String:Double] {\n\t\tget {\n\t\t\tlet centerX = width / 2\n\t\t\tlet centerY = height / 2\n\t\t\treturn [\"x\":centerX,\"y\":centerY]\n\t\t}\n\t\tset {\n\t\t\tif let x = newValue[\"x\"], let y = newValue[\"y\"] {\n\t\t\t\twidth = x * 2\n\t\t\t\theight = y * 2\n\t\t\t}\n\t\t}\n\t}\n}\n\n// getting\nvar rect1 = Rectangle(width: 10, height: 10)\nrect1.center\t\t\t\t\t// returns [\"y\": 5, \"x\": 5]\n\n// setting\nrect1.center = [\"x\": 2,\"y\": 2]\nrect1.width\t\t\t\t\t\t// returns 4"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Access Control</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Controls access to data inside struct, class, enum, or specific properties and methods within (all of them collectively called \"entity\" below). Could be used to make an entity secure, preventing other methods from modifying said entity. A good object should be designed with well defined interface, i.e. the publicly accessible methods, and make internal implementation detail&nbsp;private to hide complexity and increase abstraction."
+    },
+    {
+      "type": "text",
+      "data": "<div><ul><li><code>open</code>​:&nbsp;everyone can read and write the entity, and allow external module subclassing and overriding.</li><li><code>public</code>: everyone can read and write the entity, but does not&nbsp;allow external module subclassing and overriding.<br></li><li><code>internal</code>: this means only your Swift code can read and write the&nbsp;entity&nbsp; If you ship your code as a framework for others to use, they won’t be able to read the&nbsp;entity.<br></li><li><code>fileprivate</code>: this means that only Swift code in the same file as the type can read and write the&nbsp;entity.<br></li><li><code>private</code>: this is the most restrictive option, and means the&nbsp;entity&nbsp;is available only inside methods that belong to the type, or its extensions.<br></li></ul></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Polymorphism</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Imagine a class structure like this:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class Vehicle {\n\t// class definition\n}\n\nclass Car:Vehicle {\n\t// class definition\n}\n\nclass Train:Vehicle {\n\t// class definition\n}"
+    },
+    {
+      "type": "text",
+      "data": "An instance of <code>Car</code> can be viewed as two different ways: either as a memeber of <code>Car</code>, or as a member of <code>Vehicle</code>. Such is polymorphism. Therefore, code like the following is valid:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var vehicles: [Vehicle] = [car1,car2,train1,train2]"
+    },
+    {
+      "type": "text",
+      "data": "This is also why type casting is needed, because a subclass might be treated as a member of its superclass and only have access to the superclass's methods and properties without casting."
+    },
+    {
+      "type": "text",
+      "data": "<h2>Type Casting Array</h2>"
+    },
+    {
+      "type": "text",
+      "data": "To optionally downcast and array, nil coalesce an empty array."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "for vehicle in vehicles as? [Vehicle] ?? [Vehicle]() {\n    // code\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Closure Memory Management</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let view = UIView()\n\nUIView.animate(withDuration: 0.5, animations: {\n    view.alpha = 0\n})"
+    },
+    {
+      "type": "text",
+      "data": "Basically what \"captures the environment\" means is that the closure can use variables (in this case <code>view</code>) that are declared outside of its scope."
+    },
+    {
+      "type": "text",
+      "data": "<div>Problem is, if object A stores a closure as a property, and that property also references object A, you have something called a strong reference cycle and there will be a memory leak.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// This will be problematic\nclass SomeObject {\n    var aClosure = {\n        self.doSomething()\n    }\n}"
+    },
+    {
+      "type": "text",
+      "data": "In this case, the <code>SomeObject</code> class has a strong reference to <code>aClosure</code> and <code>aClosure</code> has captured self (the <code>SomeObject</code> instance) strongly as well."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// This is the right way\nvar aClosure = { [weak self] in\n    guard let strongSelf = self else { return }\n\n    doSomethingWithNonOptional(strongSelf)\n}"
+    },
+    {
+      "type": "text",
+      "data": "These are also not problematic:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "DispatchQueue.main.async {\n    self.doSomething()\t\t\t// Not a retain cycle, as self does not retain the DispatchQueue.main singleton\n}\n\nUIView.animate(withDuration: 1) {\n    self.doSomething()\t\t\t// Not a retain cycle, as it is a UIView class method, which self also has no part in retaining\n}"
+    },
+    {
+      "type": "text",
+      "data": "Compare these two. This closure retain self until it runs in&nbsp;60 seconds:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// Depends, might be the right behavior\nDispatchQueue.main.asyncAfter(deadline: .now() + 60) {\n    self.doSomething()\n}"
+    },
+    {
+      "type": "text",
+      "data": "<div>If you wanted self to be able to leave memory during this time, it would be better to capture it weakly and only run if self is still around:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// Depends, might be more efficient\nDispatchQueue.main.asyncAfter(deadline: .now() + 60) { [weak self] in\n    self?.doSomething()\n}"
+    }
+  ]
+}

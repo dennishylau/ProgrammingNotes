@@ -1,0 +1,93 @@
+{
+  "title": "ADS 009 Loops",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>For Loop</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "for i in 1...5 {\n\tprint(\"Printing i = \\(i)\")\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Without pass-in value</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "for _ in 1...3 {\n\tprint(\"yo\")\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Array</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let nameArray = [\"Sam\",\"Frodo\",\"Gandolf\"]\nfor name in nameArray {\n\tprint(\"Hello \\(name)!\")\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Array as Tuple</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "for (index,value) in nameArray.enumerated() {\n\tprint(\"\\(index):\\(value)\")\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Dictionary</h4>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Key:value tuple will be generated, order won't be sorted to key</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var userList = [Int:String]()\nuserList = [1:\"Dennis\",2:\"Mark\",3:\"Godfrey\"]\nfor (id,username) in userList {\n\tprint(\"ID \\(id) is \\(username).\")\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>While Loop</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>A while loop loops itself until a condition changes from true to false.<br></div><div>Condition is checked before each loop is executed, the body of a while loop must eventually change the condition so the loop does not goes on forever.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var remainingLives = 5\nvar alive = true\nwhile alive {\n\tprint(\"I still have \\(remainingLives) lives.\")\n\tremainingLives -= 1\n\tif remainingLives == 0 {\n\t\talive = false\n\t\tprint(\"I'm dead.\")\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Repeat-While Loop</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Only one difference from the standard while loop: the body of the loop runs one time before checking for the condition, stops if condition is false.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "remainingLives = 5\nalive = true\nrepeat {\n\tprint(\"I still have \\(remainingLives) lives.\")\n\tremainingLives -= 1\n\tif remainingLives == 0 {\n\t\talive = false\n\t\tprint(\"I'm dead.\")\n\t}\n} while alive"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Control Transfer Statement</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Use the break keyword to break a loop.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "for counter in 0...10 {\n\tprint(\"count is at \\(counter)\")\n\tif counter == 3 {\n\t\tbreak\n\t}\n}"
+    }
+  ]
+}

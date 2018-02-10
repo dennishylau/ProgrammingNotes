@@ -1,0 +1,45 @@
+{
+  "title": "ADS 039 Project Planning",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>API Research</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>What are the features?<br></li><li>What APIs are needed?<br></li><li>What requirements do they have on the model?<br></li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Define Model</h2>"
+    },
+    {
+      "type": "text",
+      "data": "First, review all the features. List all data, and divide them into groups that make sense. Figure out how they relate to each other. Consider:<div><ul><li>What's the primary data type?</li><li>Data source?</li><li>APIs?</li><li>Persistence?</li><li>User input?</li><li>Data display?</li></ul></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Define Views &amp; View Controllers</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Got all the features?</li><li>What view objects to use?</li><li>What model objects to display?</li><li>How to pass data around?</li><li>What is required in updateUI()?</li><li>Where to fetch data from, and save data to?</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Define Model &amp; Helper Controllers</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Usually used to perform persistence and network request.<div>Also useful when multiple VCs need the same functionality, move code to helper to reduce clutter.</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>General Approach To Follow</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ol><li>Build out the workflows, or navigation hierarchy, for navigating the app in a storyboard</li><li>Implement the model definitions and enter sample data</li><li>Build the view hierarchies for each scene</li><li>Implement the view controllers and wire the interface to the sample data</li><li>Implement model and helper controllers</li><li>Update the view controllers to create or use real data instead of sample data</li><li>Polish the visual design</li><li>At least, implement each model object and scene one at a time</li></ol>"
+    }
+  ]
+}

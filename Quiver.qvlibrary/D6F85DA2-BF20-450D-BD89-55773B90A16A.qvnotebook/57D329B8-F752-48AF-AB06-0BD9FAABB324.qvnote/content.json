@@ -1,0 +1,34 @@
+{
+  "title": "001.2 Table View Prefetching",
+  "cells": [
+    {
+      "type": "text",
+      "data": "Source:&nbsp;<a href=\"https://andreygordeev.com/2017/02/20/uitableview-prefetching/\">https://andreygordeev.com/2017/02/20/uitableview-prefetching/</a>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>UITableViewDataSourcePrefetching Protocol</h2>"
+    },
+    {
+      "type": "text",
+      "data": "What it does is by tracking scroll direction, specific IndexPaths for cells are passed into these two methods in advance, so preparation can be done in advance:<div><ul><li><code>prefetchRowsAt</code>: required<br></li><li><code>cancelPrefetchingForRowsAt</code>: optional<br></li></ul>The best way to use this would be to start downloading larger files such as images by calling the prefetchRowsAt method before the cell even starts rendering, and cancel such tasks when the scrolling direction reverses.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct Model {\n    let urlString: String\n    var url: URL {\n        return URL(string: urlString)!\n    }\n    var image: UIImage?\n\n    init(urlString: String) {\n        self.urlString = urlString\n    }\n}\n\nvar items = [\n\tModel(urlString: \"http://www.gstatic.com/webp/gallery/1.jpg\"),\n\tModel(urlString: \"http://www.gstatic.com/webp/gallery/2.jpg\"),\n\tModel(urlString: \"http://www.gstatic.com/webp/gallery/3.jpg\"),\n\tModel(urlString: \"http://www.gstatic.com/webp/gallery/4.jpg\"),\n\tModel(urlString: \"http://www.gstatic.com/webp/gallery/5.jpg\"),\n\tModel(urlString: \"http://imgsv.imaging.nikon.com/lineup/coolpix/a/a/img/sample/img_06_l.jpg\"),\n\tModel(urlString: \"http://imgsv.imaging.nikon.com/lineup/coolpix/a/a/img/sample/img_07_l.jpg\"),\n\tModel(urlString: \"http://imgsv.imaging.nikon.com/lineup/coolpix/a/a/img/sample/img_08_l.jpg\"),\n\tModel(urlString: \"http://imgsv.imaging.nikon.com/lineup/coolpix/a/a/img/sample/img_09_l.jpg\"),\n\tModel(urlString: \"http://imgsv.imaging.nikon.com/lineup/coolpix/a/a/img/sample/img_10_l.jpg\"),\n\tModel(urlString: \"https://www.gstatic.com/webp/gallery3/1.png\"),\n\tModel(urlString: \"https://www.gstatic.com/webp/gallery3/2.png\"),\n\tModel(urlString: \"https://www.gstatic.com/webp/gallery3/3.png\"),\n\tModel(urlString: \"https://www.gstatic.com/webp/gallery3/4.png\"),\n\tModel(urlString: \"https://www.gstatic.com/webp/gallery3/5.png\")\n]\n\n// Array to house independent URLSessionTask\n\nvar tasks = [URLSessionTask]()\n\n// Download and cancel\n\nfunc downloadImage(forItemAtIndex index: Int) {\n    let url = items[index].url\n    guard tasks.index(where: { $0.originalRequest?.url == url }) == nil else {\n        // We're already downloading the image.\n        return\n    }\n    let task = URLSession.shared.dataTask(with: url) { (data, response, error) in\n        // Perform UI changes only on main thread.\n        DispatchQueue.main.async {\n            if let data = data, let image = UIImage(data: data) {\n                self.items[index].image = image\n                // Reload cell with fade animation.\n                let indexPath = IndexPath(row: index, section: 0)\n                if self.tableView.indexPathsForVisibleRows?.contains(indexPath) ?? false {\n                    self.tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .fade)\n                }\n            }\n        }\n    }\n    task.resume()\n    tasks.append(task)\n}\n\nfunc cancelDownloadingImage(forItemAtIndex index: Int) {\n    let url = items[index].url\n    // Find a task with given URL, cancel it and delete from `tasks` array.\n    guard let taskIndex = tasks.index(where: { $0.originalRequest?.url == url }) else {\n        return\n    }\n    let task = tasks[taskIndex]\n    task.cancel()\n    tasks.remove(at: taskIndex)\n}\n\nextension ViewController: UITableViewDataSourcePrefetching {\n    func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {\n        print(\"prefetchRowsAt \\(indexPaths)\")\n        indexPaths.forEach { self.downloadImage(forItemAtIndex: $0.row) }\n    }\n\n    func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {\n        print(\"cancelPrefetchingForRowsAt \\(indexPaths)\")\n        indexPaths.forEach { self.cancelDownloadingImage(forItemAtIndex: $0.row) }\n    }\n}\n\n// cellForRowAt\nextension ViewController: UITableViewDataSource {\n    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {\n        return items.count\n    }\n\n    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {\n        let cell = tableView.dequeueReusableCell(withIdentifier: \"CellIdentifier\", for: indexPath)\n\n        if let imageView = cell.viewWithTag(100) as? UIImageView {\n            if let image = items[indexPath.row].image {\n                imageView.image = image\n            } else {\n                imageView.image = nil\n                self.downloadImage(forItemAtIndex: indexPath.row)\n            }\n        }\n        return cell\n    }\n}"
+    },
+    {
+      "type": "text",
+      "data": "WARNING: do not call <code>tableView.reloadData()</code> or <code>reloadRows</code> from <code>prefetchRowsAt</code>. These methods provoke UITableView to call prefetchRowsAt...&nbsp;"
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "title": "ADS 038 App Personality & Design",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Brainstorm</h2><h2></h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Be focused, strive to solve 1-3 problems for users<br></li><li>Divide users into segment and target them with specific features that solve specific problems</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Planning</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Define the problems</li><li>Aim to produce a simple product first, then improve upon it</li><li>Set the minimum required functionalities needed to solve that particular problem</li><li>Don't scope creep and keep adding features by delaying release</li><li>Create a persona that represents a target audience, think like them</li><li>List all possible features, then trim out those not needed to fulfill the minimum functionalities needed to solve the primary problem</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Prototype</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Prototype, prototype, prototype as much as possible</li><li>Start with feature set</li><li>Move on to workflow and visuals, draw wireframes</li><li>Prototype on a real device to get the feel right for each use case</li><li>Evaluate and iterate</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": ""
+    },
+    {
+      "type": "text",
+      "data": "<h2>App Icon</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Simple shape</li><li>Recognisable</li><li>No words</li><li>Don't use in app</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Launch Screen</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Minimal words</li><li>Maybe to a blank version of the initial view controller</li><li>Use colors that are also used in-app</li><li>Use Auto-Layout</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Color Design</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Complementary colors, e.g. navy with brown</li><li>Different colors for interactive and non-interactive elements</li><li>Keep it simple</li><li>White for empty space</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "One way is to change color of button title, slider and tab bar icons by calling in <code>didFinishLaunchingWithOptions</code>:"
+    },
+    {
+      "type": "code",
+      "language": "html",
+      "data": "window?.tintColor = .red"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Images</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Test and ask users</li><li>Sometimes text can be clearer</li><li>Include different versions of images, 1x for non-retina, 2x for retina, 3x for 5.5\" large retina, App Store thins the app so no unneeded images are included in installation</li><li>Use vector graphics, and set <code>Scale:&nbsp;</code><code>Single Scale</code> in the Attribute Inspector</li><li>Draw icon in balck, then set <code>Render As: Template Image</code>​ to set color during runtime using the <code>tintColor</code> property</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Animation</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Use judiciously</li><li>Realistic and does not defy laws of physics</li><li>Reversibility</li><li>Consistent with system animation</li></ul>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Typography</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<ul><li>Readability, mostly just use system default</li><li>Simplicity, use only one font is possible</li><li>Accessibility, listen to <code>UIContentSizeCategoryDidChangeNotification</code> to apply Dynamic Type setting without app restart</li><li>Prioritize, set text style in Attribute Inspector &gt; <code>Font</code>, also decide what to change for accessibility</li></ul>"
+    }
+  ]
+}

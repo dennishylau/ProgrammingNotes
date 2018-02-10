@@ -1,0 +1,27 @@
+{
+  "title": "ADS 004 Functions",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Parameters</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "//import Foundation\nimport Darwin\n\nfunc triple(value: Double) {\t\t\t\t\t\t\t\t\t\t\t// Parameter: value\t\tArgument Label: same as parameter\n\tprint(value * 3)\n}\ntriple(value: 2)\t\t\t\t\t\t\t\t\t\t\t\t\t\t// This is called \"passing in\" the value of \"value\" parameter\n\nfunc calXToPowerY(_ x: Double, toThePowerOf y: Double) -> Double {\t\t// Parameters: x, y\t\tArgument Label: empty, toThePowerOf\n\treturn pow(x, y)\t\t\t\t\t\t\t\t\t\t\t\t\t// pow() i.e. to the power declared in Darwin Module, included in Foundation\n}\ncalXToPowerY(2, toThePowerOf: 3) * 0.5\t\t\t\t\t\t\t\t\t// calXToPowerY return type is double so it works"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Default Value</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Note default value must be placed at the end of the list and must have non-empty argument label."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func xDivideByY(x: Double, y: Double = 1) {\t\t\t\t\t\t\t\t// y has a default value\n\tprint(x / y)\n}"
+    }
+  ]
+}

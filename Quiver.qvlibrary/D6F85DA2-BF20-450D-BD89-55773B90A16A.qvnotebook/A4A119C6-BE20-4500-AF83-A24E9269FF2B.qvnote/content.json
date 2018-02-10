@@ -1,0 +1,65 @@
+{
+  "title": "004 Dynamic Dispatch",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>class func vs. static func</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Difference: class func is dynamically dispatched and can be overriden by subclass."
+    },
+    {
+      "type": "text",
+      "data": "<h2>Runtime Overhead</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Dynamic dispatch refers to the&nbsp;runtime technique used when a class overrides methods and properties declared in its superclasses, and a search up the class hierarchy is needed to perform an indirect call or indirect access. This increases runtime overhead for each indirect call. There are three ways to improve performance by eliminating such dynamism: final, private, and Whole Module Optimization.&nbsp;Whole Module Optimization is set as a compiler setting, so never mind that for now."
+    },
+    {
+      "type": "text",
+      "data": "<h2>final</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>final method or property</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class ParticleModel {\n\tfinal var point = ( x: 0.0, y: 0.0 )\n\tfinal var velocity = 100.0\n\n//\tThis cannot be overriden by subclass declaring the same method\n\tfinal func updatePoint(newPoint: (Double, Double), newVelocity: Double) {\n\t\tpoint = newPoint\n\t\tvelocity = newVelocity\n\t}\n\n\tfunc update(newP: (Double, Double), newV: Double) {\n\t\tupdatePoint(newP, newVelocity: newV)\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h4>final class</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// This class cannot be subclasses, so all methods and properties are final\nfinal class ParticleModel {\n\tvar point = ( x: 0.0, y: 0.0 )\n\tvar velocity = 100.0\n\t// ...\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>private</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>private method or property</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class Person {\n\t\n\tvar name: String\n\t\n\tinit(name: String) {\n\t\tself.name = name\n\t}\n\t\n\t// when a func is declared privately, its subclass will not see it\n\tprivate func greet() {\n\t\tprint(\"Hello\")\n\t}\n}\n\nclass Dude: Person {\n\t\n\tfunc greet() {\n\t\tprint(\"Hello yo\")\n\t}\n}\n\nlet dude = Dude(name: \"Dennis\")\n\ndude.greet()\t\t// Hello yo"
+    },
+    {
+      "type": "text",
+      "data": "<h4>private class</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "private class Person {\n\t\n\tvar name: String\n\t\n\tinit(name: String) {\n\t\tself.name = name\n\t}\n\t\n\t// when a func is declared privately, its subclass will not see it\n\tprivate func greet() {\n\t\tprint(\"Hello\")\n\t}\n}\n\nprivate class Dude: Person {\n\t\n\tfunc greet() {\n\t\tprint(\"Hello yo\")\n\t}\n}\n\nprivate let dude = Dude(name: \"Dennis\")\n\ndude.greet()\t\t// Hello yo"
+    }
+  ]
+}

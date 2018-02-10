@@ -1,0 +1,65 @@
+{
+  "title": "ADS 007 Class",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Class &amp; Subclass</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div></div><div>Classes are different from structs due to inheritance.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// First we define a base class\n\nclass Vehicle {\n\tvar currentSpeed = 0.0\n\t\n\tvar description: String {\n\t\treturn \"traveling at \\(currentSpeed) km per hour\"\n\t}\n\t\n\tfunc makeNoise() {\n\t\t// Do nothing for now\n\t}\n}\n\n// Now a subclass\n\nclass Bicycle: Vehicle {\n\tvar hasBasket = false\n}\n\n// The Bicycle subclass inherits all properties and methods in the Vehicle base class\n\nvar bicycle1 = Bicycle()\nbicycle1.currentSpeed = 20\nprint(\"Bicycle1 \\(bicycle1.description).\")\n\n// The BMX subclass in turn inherits all properties and methods in the Vehicle base class and the Bicycle superclass\n\nclass BMX: Bicycle {\n\tvar suspensionType: Int = 0\n}\nvar bmx1 = BMX()\nbmx1.currentSpeed = 25\nprint(\"BMX1 \\(bmx1.description).\")\n"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Override Methods &amp; Properties</h2>"
+    },
+    {
+      "type": "text",
+      "data": "When a method or a property has already been implemented in the parent class, but the subclass required a different implementation."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "// override the superclass's method\nclass Train: Vehicle {\n\toverride func makeNoise() {\n\t\tprint(\"choo choo\")\n\t}\n}\nlet train1 = Train()\ntrain1.makeNoise()\n\n// override the superclass's property\nclass Car: Vehicle {\n\tvar gear = 1\n\toverride var description: String {\n\t\treturn super.description + \" in gear \\(gear)\"\t// use the super keyword to refer to a superclass's property\n\t}\n}\nlet car1 = Car()\ncar1.currentSpeed = 50\ncar1.gear = 5\nprint(\"Car \\(car1.description).\")"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Initializer</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div></div><div>Unlike structs, memberwise initializers are not automatically created for classes.</div><div>There are 3 ways to do this:</div><div><ul><li>Make the values optional<br></li><li>Set default value for everything<br></li><li>Write an initializer manually<br></li></ul></div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class Person {\n\tvar name: String\n\t\n\tinit(name: String) {\n\t\tself.name = name\n\t}\n}\nvar person1 = Person(name: \"Dennis Lau\")\n\nclass Student:Person {\n\tvar favoriteSubject: String\n\tinit(name:String,favoriteSubject:String) {\n\t\tself.favoriteSubject = favoriteSubject\n\t\t// Inherit the initializer for properties one's superclass has\n\t\tsuper.init(name: name)\t// only call super on superclass initializer after initializing all subclass porperties\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Value Referencing</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>A copied class references the same memory location as the original class.</div><div>All class constants and variables have stable identity, meaning that within all copies of the class they all point to the same data.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var person2 = Person(name: \"Godfrey\")\nvar myFriend = person2\nprint(person2.name)\t\t\t\t\t// person2 and myFriend point to the same memory location\nprint(myFriend.name)\nmyFriend.name = \"Adrian\"\nprint(person2.name)\t\t\t\t\t// change one name, change all names\nprint(myFriend.name)\nmyFriend = Person(name: \"Ken\")\nprint(person2.name)\t\t\t\t\t// now myFriend is separate from person2\nprint(myFriend.name)\n// struct works the opposite way, a copied struct always uses a different memory location, no referencing"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Remark</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div></div><div>Default to using a struct unless a class is necessary:</div><div><ul><li>Class required as pass in value<br></li><li>Inheritance of methods and properties<br></li><li>Referencing<br></li></ul></div>"
+    }
+  ]
+}

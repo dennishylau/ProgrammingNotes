@@ -1,0 +1,96 @@
+{
+  "title": "ADS 001 Types",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Declare Constants &amp; Variables</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let constant1 = 1\nvar variable1 = 1\nvariable1 = 2"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Types</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Instances created from initializers have default values</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let string1 = String.init()\t\t// Declared using an initializer\nlet string2 = String()\t\t\t// Shorthand for the above\nlet string3: String = \"ABC\"\t\t// Declared using literal\nlet string4: String\t\t\t\t// Declared type without initialization\n\nlet integer1 = Int()\t\t\t// Int initializer\nvar double1 = Double()\t\t\t// Double initializer\ndouble1 = 1_000_000_000.99\nvar decimal1: Decimal = 3.14\t// Decimal type, extra precision over the Double (Float) type for tiny fractions, requires Foundation\nlet bool1 = Bool()\t\t\t\t// Bool initializer\nlet char1: Character\t\t\t// Characters\n\nstruct Person {\t\t\t\t\t// Declaring a struct\n    let name: String\n    var age: Int\n    var education: [String]\t\t// Declaring an array\n}\nvar person1 = Person(name: \"Dennis Lau\", age: 22, education: [\"DBS\",\"CUHK\"])"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Tuple</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var tuple1 = (a: 0, b: \"abc\")\t// Declaring a tuple\ntuple1.a = 1\t\t\t\t\t// Assigning value for parameter a\ntuple1.1 = \"def\"\t\t\t\t// Assigning value at index 1 (first is 0)\ntuple1\t\t\t\t\t\t\t// Returns (a: 1, b: \"def\")\ntuple1 = (2,\"ghi\")\n//tuple1 = (2.1,\"abc\")\t\t\t// This returns a type error"
+    },
+    {
+      "type": "text",
+      "data": "<div>Tuple has many advantages over array:</div><div><ol><li>Defined to use multiple specific types vs array [AnyObject] undefined types<br></li><li>Defined number of arguments to take in<br></li><li>Strongly typed, so only the right type of data goes into fitting index positions<br></li><li>Named, so each parameter is distinguished<br></li></ol></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Convert Types &amp; Type Safety</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "let double2 = Double(integer1)  // Convert interger1 to a Double\ndouble1 + double2           // Only the same types can be operated, known as Type Safety"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Basic Arithmetic</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "\"+\" // Add\n\"-\" // Subtract\n\"*\" // Multiple\n\"/\" // Divide (rounded down to nearest whole number when used with Int)\n\"%\" // Remainder to division\n1 + 2 * 3   // Multiplication and division done before addition and subtraction\n\"+=\" // Compound add: add to LHS value\n\"-=\" // Compound minus\n\"*=\" // Compound multiply\n\"/=\" // Compound division"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Class v Struct</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>After an assignment operation, class retains the reference in the future and understand the two instances as the same objects (like being the same instance).</div><div>i.e. A = 1 ; B = A ; B = 2 ; A = ???</div><div>Result: A = 2</div>"
+    },
+    {
+      "type": "text",
+      "data": "<div>Struct does not retain the assignment reference, so two instances are always separate instances.</div><div>i.e. A = 1 ; B = A ; B = 2; A = ???</div><div>Result: A = 1</div>"
+    },
+    {
+      "type": "text",
+      "data": "<h4>Class</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "class SomeClass {\n\tvar name: String\n\tinit(name: String) {\n\t\tself.name = name\n\t}\n}\n\nlet aClass = SomeClass(name: \"Bob\")\nvar bClass = aClass\t\t\t\t\t\t\t\t// aClass and bClass now reference the same instance!\nbClass.name = \"Sue\"\n\nprint(aClass.name)\nprint(bClass.name)\n//Bob is now Sue, everywhere that Bob was ever referenced."
+    },
+    {
+      "type": "text",
+      "data": "<h4>Struct</h4>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "struct SomeStruct {\n\tvar name: String\n//\tinit(name: String) {\t\t\t\t\t\t// initializer not necessary for struct\n//\t\tself.name = name\n//\t}\n}\n\nlet aStruct = SomeStruct(name: \"Bob\")\nvar bStruct = aStruct\t\t\t\t\t\t\t// aStruct and bStruct are two structs with the same value!\nbStruct.name = \"Sue\"\n\nprint(aStruct.name)\nprint(bStruct.name)"
+    },
+    {
+      "type": "text",
+      "data": "<div>So for representing a stateful complex entity, a class is awesome. But for values that are simply a measurement or bits of related data, a struct makes more sense so that you can easily copy them around and calculate with them or modify the values without fear of side effects.</div>"
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}

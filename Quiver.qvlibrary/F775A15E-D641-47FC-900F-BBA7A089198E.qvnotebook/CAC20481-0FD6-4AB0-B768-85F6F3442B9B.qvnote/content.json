@@ -1,0 +1,145 @@
+{
+  "title": "TRK 001 Tricks: Basic View Controller",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h1>Status Bar</h1>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>LaunchScreen Status Bar Style</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Go to&nbsp;<code style=\"font-size: 16.200000762939453px;\">info.plist</code>, add&nbsp;<code style=\"font-size: 16.200000762939453px;\">Status bar is initially hidden = true</code>, then to restore after launching, go to&nbsp;<code style=\"font-size: 16.200000762939453px;\">AppDelegate</code>&nbsp;<code style=\"font-size: 16.200000762939453px;\">didFinishLaunchingWithOptions</code>:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "UIApplication.shared.isStatusBarHidden = false"
+    },
+    {
+      "type": "text",
+      "data": "<h3>Change Status Bar Color On Condition</h3>"
+    },
+    {
+      "type": "text",
+      "data": "Go to&nbsp;<code style=\"font-size: 16.200000762939453px;\">info.plist</code>, add&nbsp;<code style=\"font-size: 16.200000762939453px;\">View controller-based status bar appearance = No</code>, then in the specific VC's&nbsp;<code style=\"font-size: 16.200000762939453px;\">viewDidLoad</code>:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "if condition {\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.default\n} else {\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent\n}\n\n// Alternatively\n\noverride func viewWillAppear(_ animated: Bool) {\n\tsuper.viewWillAppear(animated)\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.lightContent\n}\n\noverride func viewWillDisappear(_ animated: Bool) {\n\tsuper.viewWillDisappear(animated)\n\tUIApplication.shared.statusBarStyle = UIStatusBarStyle.default\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Show Network Indicator</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Remember to set to false at some point in implementation."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "UIApplication.shared.isNetworkActivityIndicatorVisible = true"
+    },
+    {
+      "type": "text",
+      "data": "<h1>Navigation Controller</h1>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Use Large Title In Navigation Bar</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Check Prefers Larger Titles in Navigation Bar. Alternatively, call&nbsp;<code style=\"font-size: 16.200000762939453px;\">navigationController?.navigationBar.prefersLargeTitles = true</code>.<div>To use regular title size in other VC, call&nbsp;<code style=\"font-size: 16.200000762939453px;\">navigationItem.largeTitleDisplayMode = .never​</code>&nbsp;in&nbsp;<code style=\"font-size: 16.200000762939453px;\">viewDidLoad</code></div>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>BarButton System Item &amp; Dismiss Modal VC</h2>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func viewDidLoad() {\n\tsuper.viewDidLoad()\n\tif let modelObject = modelObject {\n\t// Do something\n\t} else {\n\t\tnavigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismissVC))\n\t}\n}\n\n@objc func dismissVC() {\n\tself.dismiss(animated: true, completion: nil)\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h1>View</h1>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>iPhone X Edge To Edge</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Go to the top View in a VC, then Size Inspector &gt; uncheck Safe Area Layout Guide."
+    },
+    {
+      "type": "text",
+      "data": "<h2>Hide Bars On Tap / On Swipe</h2>"
+    },
+    {
+      "type": "text",
+      "data": "For all VCs in NC: NC &gt; Attribute Inspector &gt; NC<div>For specific VC:</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func viewWillAppear(_ animated: Bool) {\n\tsuper.viewWillAppear(true)\n\tnavigationController?.hidesBarsOnTap = true\n}\n\noverride func viewWillDisappear(_ animated: Bool) {\n\tsuper.viewWillDisappear(true)\n\tnavigationController?.hidesBarsOnTap = false\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h1>Tab Bar Controller</h1>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Tab Bar Badge</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Call this method when array is updated."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func updateBadgeNumber() {\n\tlet badgeValue = someArray.count > 0 ? \"\\(someArray.count)\" : nil\n\tnavigationController?.tabBarItem.badgeValue = badgeValue\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Animate Badge</h2>"
+    },
+    {
+      "type": "text",
+      "data": "Call&nbsp;<code style=\"font-size: 16.200000762939453px;\">animateTabBarBadgeAt(tabNumber:)</code>&nbsp;upon update."
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "func animateTabBarBadgeAt(tabNumber: Int) {\n\t\n\t// tabNumber starts with 1\n\tguard let view = self.tabBarController?.tabBar.subviews[tabNumber] else {return}\n\t\n\tfor subview in (view.subviews) {\n\t\tlet viewType = String(describing: type(of: subview))\n\t\tif viewType == \"_UIBadgeView\" {\n\t\t\tanimateView(view: subview)\n\t\t}\n\t}\n}\n\nfunc animateView(view:UIView){\n\t\n\t// Must call layoutIfNeeded first to have it init at the right position\n\tview.layer.layoutIfNeeded()\n\t\n\t// Horizontal shake\n\tlet shakeAnimation = CABasicAnimation(keyPath: \"position\")\n\tshakeAnimation.duration = 0.04\n\tshakeAnimation.repeatCount = 4\n\tshakeAnimation.autoreverses = true\n\tshakeAnimation.fromValue = NSValue(cgPoint: CGPoint(x:view.center.x - 1, y:view.center.y))\n\tshakeAnimation.toValue = NSValue(cgPoint: CGPoint(x:view.center.x + 1, y:view.center.y))\n\tview.layer.add(shakeAnimation, forKey: \"position\")\n\t\n\t// Scale once without the translation, scale every time with it\n\tlet scaleTransform = CGAffineTransform(scaleX: 1.2, y: 1.2)\n\tlet translateTransform = CGAffineTransform(translationX: view.layer.frame.width * 0.1, y: view.layer.frame.height * 0.1)\n\tview.layer.transform = CATransform3DMakeAffineTransform(translateTransform)\n\tUIView.animate(withDuration: 0.3, animations: {\n\t\tview.layer.transform = CATransform3DMakeAffineTransform(scaleTransform)\n\t})\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h1>Home Indicator</h1>"
+    },
+    {
+      "type": "text",
+      "data": "<h2>iPhone X Hide Home Indicator</h2>"
+    },
+    {
+      "type": "text",
+      "data": "In VC call:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func prefersHomeIndicatorAutoHidden() -> Bool {\n\t// hides when hidesBarsOnTap == true\n\treturn navigationController?.hidesBarsOnTap ?? false\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2><br></h2>"
+    }
+  ]
+}

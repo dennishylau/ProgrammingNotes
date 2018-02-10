@@ -1,0 +1,43 @@
+{
+  "title": "HWS 001 File Manager, Push VC",
+  "cells": [
+    {
+      "type": "text",
+      "data": "<h2>Add Images Without Using Assets Catalog</h2><h2></h2>"
+    },
+    {
+      "type": "text",
+      "data": "Drag the folder with images in from Finder into Xcode, check copy and as a group.&nbsp;"
+    },
+    {
+      "type": "text",
+      "data": "<h2>App Directory</h2>"
+    },
+    {
+      "type": "text",
+      "data": "<div>An iOS app is a directory containing lots of files: the binary, all media assets, visual layout files, and other things such as metadata and security entitlements. These app directories are called bundles, and they have the file extension .app. Media files are loose inside the directory, so it is possible to list all the files in the directory, and pull out the ones with names that matches a certain phase.</div>"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "var pictures = [String]()\n\noverride func viewDidLoad() {\n\tsuper.viewDidLoad()\n\tlet fm = FileManager.default\n\tguard let path = Bundle.main.resourcePath,\n\t\tlet items = try? fm.contentsOfDirectory(atPath: path)\n\telse {return}\n\t// fm gets the shared file manager object\n\t// path for this bundle's main dir (executable location) resources\n\t\n\tfor item in items {\n\t\tif item.hasPrefix(\"nssl\") {\n\t\t\tpictures.append(item)\n\t\t}\n\t}\n}\n\n// To load image\n\n@IBOutlet weak var imageView: UIImageView!\n\nvar selectedImage: String?\n\nif let imageToLoad = selectedImage {\n\timageView.image = UIImage(named: imageToLoad)\n}"
+    },
+    {
+      "type": "text",
+      "data": "<h2>Programmatically Push View Controller</h2>"
+    },
+    {
+      "type": "text",
+      "data": "The behavior is exactly the same as using a Show segue, with working swipe to go back. Say for didSelectRowAt:"
+    },
+    {
+      "type": "code",
+      "language": "swift",
+      "data": "override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {\n\tif let vc = storyboard?.instantiateViewController(withIdentifier: \"Detail\") as? DetailViewController {\n\t\t// var selectedImage in vc\n\t\tvc.selectedImage = pictures[indexPath.row]\n\t\tnavigationController?.pushViewController(vc, animated: true)\n\t}\n}"
+    },
+    {
+      "type": "text",
+      "data": ""
+    }
+  ]
+}
